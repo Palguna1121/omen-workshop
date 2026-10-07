@@ -40,22 +40,34 @@ Kontrol dan physics berhenti saat panel/menu terbuka. Blur/tab tersembunyi membe
 
 ## Model dan animasi
 
-**Entry runtime:** `public/models/omen/chibi-hooded-walk-preview.glb` → `/models/omen/chibi-hooded-walk-preview.glb`.
+**Entry runtime:** `public/models/omen/chibi-animation-source.glb` → `/models/omen/chibi-animation-source.glb`.
 
-Seluruh isi `/home/nanaaa/Downloads/omen` disalin ke `public/models/omen/` dengan struktur relatif utuh. Ada 20 file, total 120.372.987 byte, termasuk master, video, folder `tess`, referensi, serta laporan sumber. Sumber asli tidak diedit. Checksum SHA-256 semua salinan cocok dengan sumber; lihat `docs/model-inventory.json`.
+Seluruh isi `/home/nanaaa/Downloads/omen` disalin ke `public/models/omen/` dengan struktur relatif utuh, termasuk 8 GLB tambahan. Ada 28 file, total 140.110.275 byte, termasuk master, video, folder `tess`, referensi, serta laporan sumber. Sumber asli tidak diedit. Checksum SHA-256 semua salinan cocok dengan sumber; lihat `docs/model-inventory.json`.
 
 | File | Ukuran | Isi |
 | --- | ---: | --- |
+| `chibi-animation-source.glb` | 3.072.132 byte | Entry aktif; `idle`, `walk`, `jump`, `sit`, `defeat_03` |
+| `chibi-idle.glb` | 2.615.944 byte | Klip `idle` |
+| `chibi-jump.glb` | 2.354.600 byte | Klip `jump` |
+| `chibi-walk.glb` | 2.330.852 byte | Klip `walk` |
+| `chibi-sit.glb` | 2.455.832 byte | Klip `sit` |
+| `chibi-defeat-2.glb` | 2.359.252 byte | Klip `defeat_02` |
+| `chibi-omen-run.glb` | 2.274.332 byte | Mesh/skin, **tanpa klip animasi** |
+| `chibi-omen-standing-relax.glb` | 2.274.344 byte | Mesh/skin, **tanpa klip animasi** |
 | `chibi-hooded-walk-preview.glb` | 2.342.136 byte | Mesh, skin, tekstur embedded, klip `walk` |
 | `chibi-hooded-rigged.glb` | 2.274.336 byte | Mesh, skin, tekstur embedded; tanpa klip |
 | `chibi-hooded-textured-master.glb` | 54.668.072 byte | Master bertekstur; tanpa klip |
 | `chibi-hooded-master.glb` | 45.557.660 byte | Master mesh; tanpa klip |
 
-Semua GLB memiliki header v2 dan tidak membutuhkan URI `.bin`/tekstur eksternal. Salinan `tess/` dipertahankan. Browser hanya meminta walk preview 2,34 MB saat masuk; master dan video tidak dimuat oleh aplikasi.
+Semua GLB memiliki header v2 dan tidak membutuhkan URI `.bin`/tekstur eksternal. Salinan `tess/` dipertahankan. Browser hanya meminta bundle 3,07 MB saat masuk; GLB standalone, master, dan video tidak dimuat oleh aplikasi.
 
-Model dinormalisasi ke tinggi 1,65 unit, diklon dengan SkeletonUtils, dan mengikuti capsule Rapier. Klip asli **hanya `walk`** (sekitar 2,33 detik). `WorkshopIdle` kini merupakan loop skeletal 4,8 detik: dada bergerak halus, kepala dan lengan mengayun ringan, sementara kaki/hips mempertahankan bind pose agar menapak. `WorkshopJump` memberi pose udara; posisi lompat dan pendaratan ditangani Rapier. Kedua klip dibuat di aplikasi, tanpa menulis ulang GLB. Walk dipercepat 1,7× saat berlari. Ganti nama di `characterAsset.animations` dalam `src/game/config.ts` untuk memakai klip idle/run/jump final.
+Model dinormalisasi ke tinggi 1,65 unit, diklon dengan SkeletonUtils, dan mengikuti capsule Rapier. Bundle baru memakai skeleton 65 joint yang sama dengan model sebelumnya. Web kini menggunakan klip asli `idle` (15,33 detik), `walk` (2,33 detik), dan `jump` (sumber 2,21 detik). Idle mempertahankan gerak lokal/weight shift animator. Root motion horizontal walk dihilangkan karena gerakan posisi ditangani physics.
 
-Space dan tombol mobile meminta satu lompatan. Ray di bawah capsule mengecualikan karakter sendiri dan memeriksa arah normal permukaan; permintaan di udara dibuang. Menahan Space tidak menyebabkan lompatan berulang. Ada tabrakan plafon dan furniture, dan kontrol lompat ikut berhenti saat panel/menu terbuka.
+Klip jump sumber berisi beberapa hop. Runtime menggunakan segmen pertama, frame 0 sampai sebelum 11 pada 24 fps (0–0,417 detik), sebagai satu lompatan. Root translation XYZ pada segmen ini dikunci agar tidak menambahkan perpindahan/tinggi di atas Rapier. Pose tulang tetap berasal dari klip asli. Klip dimainkan sekali, waktunya disesuaikan ke lama terbang nominal sekitar 1,08 detik, lalu kembali idle/walk setelah kaki menapak. Input dan state animasi diproses sebelum mixer/physics; posisi runtime diperbarui sesudah step physics. File sumber dan klip sumber dalam GLB tetap utuh.
+
+**Run belum tersedia sebagai klip asli:** dua file bernama run dan standing-relax memiliki mesh/skin tetapi array animasinya kosong. Shift masih memakai walk 1,7×. Untuk menggantinya, ekspor ulang dengan animasi `run` disertakan ke bundle, lalu sesuaikan `characterAsset.animations` di `src/game/config.ts`. `sit` (7,17 detik), `defeat_03` (5,54 detik), dan `defeat_02` (5,54 detik) sudah tersimpan; belum ditautkan ke aksi portfolio. Idle/jump prosedural hanya menjadi cadangan bila model pengganti tidak memiliki klip tersebut.
+
+Space dan tombol mobile meminta satu lompatan. Ray di bawah capsule mengecualikan karakter sendiri dan memeriksa arah normal permukaan; permintaan di udara dibuang. Menahan Space tidak menyebabkan lompatan berulang. Ada tabrakan plafon dan furniture. Physics, kontrol, dan mixer animasi ikut berhenti saat panel/menu terbuka.
 
 Model gagal dimuat memakai placeholder hooded dengan tiga tanda cyan. Aset asal memiliki keterbatasan auto-rig jubah; lipatan/penetrasi jubah masih terlihat pada beberapa pose. Perbaikan skin weights dan animasi jubah adalah tahap berikutnya.
 
@@ -129,7 +141,7 @@ Hasil pemeriksaan sesi ini dicatat di `docs/VALIDATION.md`.
 
 1. Masukkan concept art/storyboard asli, lalu finalisasi ukuran/layout dan lighting sesuai referensi favorit.
 2. Ganti geometri rumah/prop dengan GLB teroptimasi; pertahankan collider sederhana dan titik interaksi.
-3. Siapkan klip idle/run/jump dari animator, perbaiki skin weights jubah, dan poles transisi/feet contact.
+3. Ekspor ulang run/standing-relax dengan klip animasi, tautkan sit/defeat bila interaksinya dibutuhkan, dan perbaiki skin weights jubah/feet contact.
 4. Tambahkan collision kamera terhadap prop; saat ini kamera dibatasi ke dalam dinding hub.
 5. Lengkapi studi kasus, pengalaman, kontak, dan CV milik pemilik.
 6. Lakukan QA perangkat fisik, Safari/Firefox, koneksi lambat, kemudian hosting.

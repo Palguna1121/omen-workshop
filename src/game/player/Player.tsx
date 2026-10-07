@@ -3,12 +3,13 @@ import { useFrame } from "@react-three/fiber";
 import {
   CapsuleCollider,
   RigidBody,
+  useAfterPhysicsStep,
   useRapier,
   type RapierRigidBody,
 } from "@react-three/rapier";
 import { Group, MathUtils } from "three";
 import { useGameStore } from "@/store/gameStore";
-import { PLAYER_SPAWN } from "../config";
+import { PLAYER_SPAWN, playerMotion } from "../config";
 import { resetRuntime, runtime } from "../runtime";
 import { Character } from "./Character";
 import { useController } from "./Controller";
@@ -18,6 +19,10 @@ export function Player() {
   const visual = useRef<Group>(null);
   const keys = useController();
   const { world, rapier } = useRapier();
+  useAfterPhysicsStep(() => {
+    const position = body.current?.translation();
+    if (position) runtime.player.set(position.x, position.y, position.z);
+  });
   const phase = useGameStore((s) => s.phase);
   useEffect(() => {
     if (phase === "intro" || phase === "ready") {
@@ -50,7 +55,7 @@ export function Player() {
       x /= length;
       z /= length;
     }
-    const speed = key.has("ShiftLeft") || key.has("ShiftRight") ? 4.6 : 2.6;
+    const speed = key.has("ShiftLeft") || key.has("ShiftRight") ? playerMotion.runSpeed : playerMotion.walkSpeed;
     const vx = (x * Math.cos(runtime.yaw) + z * Math.sin(runtime.yaw)) * speed;
     const vz = (-x * Math.sin(runtime.yaw) + z * Math.cos(runtime.yaw)) * speed;
     const velocity = body.current.linvel();
@@ -69,7 +74,7 @@ export function Player() {
     const jumping = !blocked && runtime.jumpRequested && runtime.grounded;
     runtime.jumpRequested = false;
     if (jumping) runtime.grounded = false;
-    body.current.setLinvel({ x: vx, y: jumping ? 5.3 : velocity.y, z: vz }, true);
+    body.current.setLinvel({ x: vx, y: jumping ? playerMotion.jumpSpeed : velocity.y, z: vz }, true);
     runtime.player.set(position.x, position.y, position.z);
     runtime.speed = Math.hypot(vx, vz);
     if (position.y < -5) {
@@ -93,7 +98,7 @@ export function Player() {
         visual.current.rotation.y,
         Math.PI * 2,
       );
-  });
+  }, -2);
   return (
     <RigidBody
       ref={body}

@@ -21,6 +21,7 @@ import { AudioHelper } from "./audio/AudioHelper";
 import { HUD } from "@/ui/HUD";
 import { ProjectPanel } from "@/ui/ProjectPanel";
 import { LoadingScreen } from "@/ui/LoadingScreen";
+import { playerMotion } from "./config";
 
 export function GameFallback() {
   return (
@@ -165,7 +166,7 @@ function GameCanvas() {
             shadow-camera-far={12}
           />
           <Suspense fallback={null}>
-            <Physics gravity={[0, -9.81, 0]} paused={paused} timeStep={1 / 60}>
+            <Physics gravity={[0, playerMotion.gravity, 0]} paused={paused} timeStep={1 / 60}>
               <World />
               <Player />
               <InteractionSystem />

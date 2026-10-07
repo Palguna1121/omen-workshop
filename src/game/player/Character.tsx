@@ -10,9 +10,10 @@ import { useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { Box3, DoubleSide, Group, Mesh, SkinnedMesh, Vector3, type Material } from "three";
-import { characterAsset } from "../config";
+import { characterAsset, playerMotion } from "../config";
 import { runtime } from "../runtime";
-import { inPlaceAnimations, withWorkshopAnimations } from "./animations";
+import { useGameStore } from "@/store/gameStore";
+import { configureJumpAction, pauseCharacterAnimation, prepareCharacterClips } from "./animations";
 
 function Placeholder() {
   const torso = useRef<Group>(null);
@@ -107,22 +108,27 @@ function Model({ url }: { url: string }) {
     const scale = characterAsset.height / Math.max(height, 0.1);
     return {
       scene,
-      clips: withWorkshopAnimations(inPlaceAnimations(gltf.animations), scene, characterAsset.animations.walk, characterAsset.animations.idle, characterAsset.animations.jump),
+      clips: prepareCharacterClips(gltf.animations, scene, characterAsset.animations, characterAsset.jumpSegment),
       scale,
       floor: -box.min.y * scale,
     };
   }, [gltf]);
-  const { actions } = useAnimations(clips, scene);
+  const { actions, mixer } = useAnimations(clips, scene);
   const current = useRef("");
   useEffect(() => {
     const idle = actions[characterAsset.animations.idle];
+    const jump = actions[characterAsset.animations.jump];
+    if (jump) configureJumpAction(jump, 2 * playerMotion.jumpSpeed / Math.abs(playerMotion.gravity));
     idle?.reset().play();
     current.current = characterAsset.animations.idle;
     return () => {
       Object.values(actions).forEach((action) => action?.stop());
     };
   }, [actions]);
+  // Perbarui state sebelum mixer/physics agar jump dimulai pada frame input.
   useFrame(() => {
+    const state = useGameStore.getState();
+    pauseCharacterAnimation(mixer, state.phase === "playing" && (!!state.section || state.menuOpen));
     const configured =
       !runtime.grounded
         ? characterAsset.animations.jump
@@ -138,8 +144,10 @@ function Model({ url }: { url: string }) {
       current.current = desired;
     }
     const action = actions[current.current];
-    action?.setEffectiveTimeScale(runtime.grounded && runtime.speed > 4 && !actions[characterAsset.animations.run] ? 1.7 : 1);
-  });
+    if (current.current !== characterAsset.animations.jump) {
+      action?.setEffectiveTimeScale(runtime.grounded && runtime.speed > 4 && !actions[characterAsset.animations.run] ? 1.7 : 1);
+    }
+  }, -1);
   return (
     <group
       position={[0, floor, 0]}

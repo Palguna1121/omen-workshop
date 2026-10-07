@@ -1,8 +1,22 @@
-import { AnimationClip, Bone, Quaternion, QuaternionKeyframeTrack, Vector3, VectorKeyframeTrack, type KeyframeTrack, type Object3D } from "three";
+import {
+  AnimationClip,
+  AnimationUtils,
+  Bone,
+  LoopOnce,
+  Quaternion,
+  QuaternionKeyframeTrack,
+  Vector3,
+  VectorKeyframeTrack,
+  type AnimationAction,
+  type AnimationMixer,
+  type KeyframeTrack,
+  type Object3D,
+} from "three";
 
-export function inPlaceAnimations(clips: AnimationClip[]) {
+export function inPlaceAnimations(clips: AnimationClip[], names?: readonly string[]) {
   return clips.map((source) => {
     const clip = source.clone();
+    if (names && !names.includes(source.name)) return clip;
     for (const track of clip.tracks) {
       if (
         track instanceof VectorKeyframeTrack &&
@@ -17,6 +31,43 @@ export function inPlaceAnimations(clips: AnimationClip[]) {
     }
     return clip;
   });
+}
+
+export function prepareCharacterClips(
+  clips: AnimationClip[],
+  scene: Object3D,
+  names: { idle: string; walk: string; run: string; jump: string },
+  segment: { startFrame: number; endFrame: number; fps: number },
+) {
+  // Idle mempertahankan perpindahan berat badan lokal dari animator.
+  const prepared = inPlaceAnimations(clips, [names.walk, names.run]);
+  const jumpIndex = prepared.findIndex((clip) => clip.name === names.jump);
+  if (jumpIndex !== -1) {
+    const excerpt = AnimationUtils.subclip(
+      prepared[jumpIndex], names.jump,
+      segment.startFrame, segment.endFrame, segment.fps,
+    );
+    const jump = excerpt.duration > 0 && excerpt.tracks.length ? excerpt : prepared[jumpIndex];
+    for (const track of jump.tracks) {
+      if (!(track instanceof VectorKeyframeTrack) || !/(?:hips|root)\.position$/i.test(track.name)) continue;
+      // Physics memindahkan tubuh, termasuk tinggi lompat; jangan tambahkan
+      // perpindahan root dari file untuk kedua kalinya.
+      const origin = track.values.slice(0, 3);
+      for (let i = 0; i < track.values.length; i += 3) track.values.set(origin, i);
+    }
+    prepared[jumpIndex] = jump;
+  }
+  return withWorkshopAnimations(prepared, scene, names.walk, names.idle, names.jump);
+}
+
+export function configureJumpAction(action: AnimationAction, flightDuration: number) {
+  action.setLoop(LoopOnce, 1);
+  action.clampWhenFinished = true;
+  action.setEffectiveTimeScale(action.getClip().duration / flightDuration);
+}
+
+export function pauseCharacterAnimation(mixer: AnimationMixer, paused: boolean) {
+  mixer.timeScale = paused ? 0 : 1;
 }
 
 function sample(track: KeyframeTrack | undefined, fallback: number[]) {
@@ -35,6 +86,7 @@ export function withWorkshopAnimations(
   idleName: string,
   jumpName: string,
 ) {
+  if (clips.some((clip) => clip.name === idleName) && clips.some((clip) => clip.name === jumpName)) return clips;
   const walk = clips.find((clip) => clip.name === walkName);
   const sourceTracks = new Map(walk?.tracks.map((track) => [track.name, track]));
   const idle: KeyframeTrack[] = [];

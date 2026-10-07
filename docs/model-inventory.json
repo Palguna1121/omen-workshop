@@ -1,7 +1,7 @@
 {
-  "entry": "/models/omen/chibi-hooded-walk-preview.glb",
-  "files": 20,
-  "totalBytes": 120372987,
+  "entry": "/models/omen/chibi-animation-source.glb",
+  "files": 28,
+  "totalBytes": 140110275,
   "copyVerifiedAgainst": "/home/nanaaa/Downloads/omen",
   "inventory": [
     {
@@ -10,10 +10,71 @@
       "sha256": "bf74ac383b06665eac1613af0bef161a7a34fb9fe65a8e7f7841618486656e70"
     },
     {
+      "file": "chibi-animation-source.glb",
+      "bytes": 3072132,
+      "sha256": "cdbda0b81f7ab376aee7343220fb64e122a8b6d7aa2b6cd8a0064725c00104f7",
+      "animations": [
+        "sit",
+        "defeat_03",
+        "jump",
+        "idle",
+        "walk"
+      ],
+      "animationClips": [
+        {
+          "name": "sit",
+          "duration": 7.166666666666667,
+          "channels": 195
+        },
+        {
+          "name": "defeat_03",
+          "duration": 5.541666666666667,
+          "channels": 195
+        },
+        {
+          "name": "jump",
+          "duration": 2.2083333333333335,
+          "channels": 195
+        },
+        {
+          "name": "idle",
+          "duration": 15.333333333333334,
+          "channels": 195
+        },
+        {
+          "name": "walk",
+          "duration": 2.3333333333333335,
+          "channels": 195
+        }
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-defeat-2.glb",
+      "bytes": 2359252,
+      "sha256": "f01427a83dec179b175e327570c3d54ab6be9fc43fa57fdbd6c0dd7c7bd2748e",
+      "animations": [
+        "defeat_02"
+      ],
+      "animationClips": [
+        {
+          "name": "defeat_02",
+          "duration": 5.541666507720947,
+          "channels": 195
+        }
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
       "file": "chibi-hooded-master.glb",
       "bytes": 45557660,
       "sha256": "35d3573c41cc0b32f1f05f225405bd7b76ecdbb14194d8e303d3955c5e1be680",
       "animations": [],
+      "animationClips": [],
       "meshes": 1,
       "skins": 0,
       "externalUris": []
@@ -23,6 +84,7 @@
       "bytes": 2274336,
       "sha256": "4e5e39e9f9bef96f0ab08150c77bf66b082dea4d67676af5dc844b80f9f8c883",
       "animations": [],
+      "animationClips": [],
       "meshes": 1,
       "skins": 1,
       "externalUris": []
@@ -32,6 +94,7 @@
       "bytes": 54668072,
       "sha256": "d3b6970ca38d99671f5adffe2c16698a32ebaa635bf036c1a34fc7de2e791262",
       "animations": [],
+      "animationClips": [],
       "meshes": 1,
       "skins": 0,
       "externalUris": []
@@ -42,6 +105,105 @@
       "sha256": "6ebf5006b7d0cc3106f41b12265c56fe4955953b84b94b9acdd9f750a672c16c",
       "animations": [
         "walk"
+      ],
+      "animationClips": [
+        {
+          "name": "walk",
+          "duration": 2.3333333333333335,
+          "channels": 195
+        }
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-idle.glb",
+      "bytes": 2615944,
+      "sha256": "657646d2d57f10b5b1a496a5139958e243843d30ff3b5617556119658d4210ba",
+      "animations": [
+        "idle"
+      ],
+      "animationClips": [
+        {
+          "name": "idle",
+          "duration": 15.333333015441895,
+          "channels": 195
+        }
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-jump.glb",
+      "bytes": 2354600,
+      "sha256": "e7fd0f95a3e212738ca9ed6c222ad020e06ba2a96fccbb7aacc2ea0082e8603f",
+      "animations": [
+        "jump"
+      ],
+      "animationClips": [
+        {
+          "name": "jump",
+          "duration": 2.2083332538604736,
+          "channels": 195
+        }
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-omen-run.glb",
+      "bytes": 2274332,
+      "sha256": "3e81dc19a2dc6d4da428c74282436b123c3b2631e78daec4f0eab7a836185c6c",
+      "animations": [],
+      "animationClips": [],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-omen-standing-relax.glb",
+      "bytes": 2274344,
+      "sha256": "bd1bb0118f71fb419769e0b1b39aa5d3ef95d139482d59a06f3b05b94471864f",
+      "animations": [],
+      "animationClips": [],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-sit.glb",
+      "bytes": 2455832,
+      "sha256": "f246ab40e1abc4e3b3798187b89075a4b10c0b382440218bfc5e93d79a378716",
+      "animations": [
+        "sit"
+      ],
+      "animationClips": [
+        {
+          "name": "sit",
+          "duration": 7.166666507720947,
+          "channels": 195
+        }
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-walk.glb",
+      "bytes": 2330852,
+      "sha256": "9f4a37ffc3d01a0d7c4d3c2efa4d7cdccc6924ac81fbc8d342030d614390eef9",
+      "animations": [
+        "walk"
+      ],
+      "animationClips": [
+        {
+          "name": "walk",
+          "duration": 2.3333332538604736,
+          "channels": 195
+        }
       ],
       "meshes": 1,
       "skins": 1,
@@ -57,6 +219,7 @@
       "bytes": 2274336,
       "sha256": "4e5e39e9f9bef96f0ab08150c77bf66b082dea4d67676af5dc844b80f9f8c883",
       "animations": [],
+      "animationClips": [],
       "meshes": 1,
       "skins": 1,
       "externalUris": []
@@ -67,6 +230,13 @@
       "sha256": "6ebf5006b7d0cc3106f41b12265c56fe4955953b84b94b9acdd9f750a672c16c",
       "animations": [
         "walk"
+      ],
+      "animationClips": [
+        {
+          "name": "walk",
+          "duration": 2.3333333333333335,
+          "channels": 195
+        }
       ],
       "meshes": 1,
       "skins": 1,
