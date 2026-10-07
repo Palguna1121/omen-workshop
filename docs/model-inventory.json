@@ -1,0 +1,136 @@
+{
+  "entry": "/models/omen/chibi-hooded-walk-preview.glb",
+  "files": 20,
+  "totalBytes": 120372987,
+  "copyVerifiedAgainst": "/home/nanaaa/Downloads/omen",
+  "inventory": [
+    {
+      "file": "WhatsApp Video 2026-10-06 at 2.44.48 PM.mp4",
+      "bytes": 8071890,
+      "sha256": "bf74ac383b06665eac1613af0bef161a7a34fb9fe65a8e7f7841618486656e70"
+    },
+    {
+      "file": "chibi-hooded-master.glb",
+      "bytes": 45557660,
+      "sha256": "35d3573c41cc0b32f1f05f225405bd7b76ecdbb14194d8e303d3955c5e1be680",
+      "animations": [],
+      "meshes": 1,
+      "skins": 0,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-hooded-rigged.glb",
+      "bytes": 2274336,
+      "sha256": "4e5e39e9f9bef96f0ab08150c77bf66b082dea4d67676af5dc844b80f9f8c883",
+      "animations": [],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-hooded-textured-master.glb",
+      "bytes": 54668072,
+      "sha256": "d3b6970ca38d99671f5adffe2c16698a32ebaa635bf036c1a34fc7de2e791262",
+      "animations": [],
+      "meshes": 1,
+      "skins": 0,
+      "externalUris": []
+    },
+    {
+      "file": "chibi-hooded-walk-preview.glb",
+      "bytes": 2342136,
+      "sha256": "6ebf5006b7d0cc3106f41b12265c56fe4955953b84b94b9acdd9f750a672c16c",
+      "animations": [
+        "walk"
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "image.png",
+      "bytes": 814979,
+      "sha256": "5dd0620ebfef751299c7274e256f99a1e9c462b6a02d0872748a2085088d527f"
+    },
+    {
+      "file": "tess/chibi-hooded-rigged.glb",
+      "bytes": 2274336,
+      "sha256": "4e5e39e9f9bef96f0ab08150c77bf66b082dea4d67676af5dc844b80f9f8c883",
+      "animations": [],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "tess/chibi-hooded-walk-preview.glb",
+      "bytes": 2342136,
+      "sha256": "6ebf5006b7d0cc3106f41b12265c56fe4955953b84b94b9acdd9f750a672c16c",
+      "animations": [
+        "walk"
+      ],
+      "meshes": 1,
+      "skins": 1,
+      "externalUris": []
+    },
+    {
+      "file": "tess/hasil-tripo.json",
+      "bytes": 2730,
+      "sha256": "ff4620565a9352be4411d214d6a2ef0e120c84d6548723bf24a410e4635ca241"
+    },
+    {
+      "file": "tess/karakter-t-pose.png",
+      "bytes": 814979,
+      "sha256": "5dd0620ebfef751299c7274e256f99a1e9c462b6a02d0872748a2085088d527f"
+    },
+    {
+      "file": "tess/preview-jalan-samping.jpg",
+      "bytes": 83219,
+      "sha256": "d14e217fdd7675a70d2c9da970f9b3afc4faf58129134d82e20c8d845852e7b6"
+    },
+    {
+      "file": "tess/preview-jalan-tripo.jpg",
+      "bytes": 87680,
+      "sha256": "6d17e8114c2ecf8d2e2c5fa205b8f62b0e355df984d7c82290c9e12bded74a05"
+    },
+    {
+      "file": "tess/referensi/belakang.png",
+      "bytes": 286074,
+      "sha256": "93899e9beb24c2e45fd8157d3f2dea52d6850837f76f91d6a061f0c2a06644de"
+    },
+    {
+      "file": "tess/referensi/depan.png",
+      "bytes": 352826,
+      "sha256": "2c39c65da4d7a0c2bf2e96d9af785ebc66d91ecd1cf1385e64507545c1dde370"
+    },
+    {
+      "file": "tess/referensi/samping.png",
+      "bytes": 287730,
+      "sha256": "2df6e24fd47cd3046ca6c512c9107809788fae414edae3342b29715755986cec"
+    },
+    {
+      "file": "tess/rig-tripo-selesai.jpg",
+      "bytes": 98928,
+      "sha256": "ca3bd71c0be7c79b28a2ff0cff670800b02ebc3ac239ba5441154670d3d55449"
+    },
+    {
+      "file": "tess/setup-karakter-tripo.md",
+      "bytes": 6467,
+      "sha256": "36a8b18a22c3e817e8531b8695a946bc941864bebf4cf94902cc103bcd2186e5"
+    },
+    {
+      "file": "tess/validasi-contoh-jalan.json",
+      "bytes": 3115,
+      "sha256": "f52cb81ece56ee46ba4d9b3c9cda7e0ebbcbf0292929d5d596c090138faa459e"
+    },
+    {
+      "file": "tess/validasi-optimasi.json",
+      "bytes": 651,
+      "sha256": "28743d25b408eff737852a24972a968c40b61bf66da0d3c2b39f855bc1900e0a"
+    },
+    {
+      "file": "tess/validasi-rig.json",
+      "bytes": 3043,
+      "sha256": "c683e055a3927e27e0f1d0f7f2fcdf1bcf266c4172864d785c1e1647f3edce2a"
+    }
+  ]
+}
