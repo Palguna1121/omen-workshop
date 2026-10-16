@@ -1,4 +1,15 @@
-# Validasi MVP — 7 Oktober 2026
+# Validasi MVP — 8 Oktober 2026
+
+## Dunia sunset — 16 Oktober 2026
+
+- `npm run typecheck`, `npm run lint`, `npm run build`: lolos. `npm run test`: 11/11 lolos (tes proximity diperbarui ke posisi stasiun baru, ditambah titik spawn halaman).
+- Uji Chrome headless dengan GPU (ANGLE Vulkan, AMD Radeon 780M iGPU), server produksi port 3111, 1440 × 900 DPR 1, kualitas Standar: 60 fps di welcome, intro, halaman, dan interior. Kualitas Tinggi (N8AO) turun ke ~51 fps di interior, karena itu AO opsional.
+- Emulasi iPhone 14 (390 × 844): 60 fps di GPU desktop (bukan angka perangkat nyata), tanpa overflow horizontal, kontrol sentuh bertema dusk, FOV portrait melebar.
+- Chrome headless tanpa GPU (SwiftShader) hanya ~1,4 fps; GSAP lag smoothing membuat intro tampak berhenti di sana. Ini batas renderer CPU, bukan perangkat dengan GPU.
+- Alur diuji: loading → welcome → intro 4 shot → halaman; jalan ke interior (W), marker + prompt E stasiun Keahlian muncul; jalan ke tangga rumah lalu naik ke teras (ramp collider); kamera tidak menembus dinding/plafon (raycast Rapier).
+- Bloom + MSAA composer (multisampling 4) menghasilkan layar kosong di three r186 + postprocessing 6.39.5; composer memakai multisampling 0 + SMAA.
+- Aset dunia: `public/models/world/kit.glb` 282.184 byte (37 prop). Tidak ada request CDN; decoder meshopt dibundel.
+- Watcher `next dev` sempat tidak memuat ulang `src/app/globals.css`; menyentuh `layout.tsx` memaksa kompilasi ulang. Build produksi tidak terpengaruh.
 
 ## Pemeriksaan akhir
 
@@ -6,9 +17,17 @@
 - `npm run typecheck`: lolos.
 - `npm run lint`: lolos, tanpa error/warning ESLint.
 - `npm run test`: 11 tes lolos, 0 gagal. Mencakup proximity/fase game, fallback idle, klip asli yang dipertahankan, root motion walk/jump, satu hop tanpa pengulangan, durasi playback sesuai physics, dan mixer berhenti saat panel terbuka.
-- Salinan model: 28 file, 140.110.275 byte, SHA-256 seluruh salinan cocok dengan Downloads. Header GLB v2 dan dependensi URI diperiksa; tidak ada referensi eksternal pada GLB.
+- Salinan model: 28 file, 140.567.107 byte, SHA-256 seluruh salinan cocok dengan Downloads. Header GLB v2 dan dependensi URI diperiksa; tidak ada referensi eksternal pada GLB.
 
-## Pembaruan animasi tambahan
+## Run dan standing-relax — 8 Oktober
+
+Unduhan ulang menyediakan `run` (1,25 detik) dan `standing_relax` (17,58 detik), masing-masing 195 channel dengan 65 joint/bind pose yang kompatibel. Keduanya disalin, lalu data animasinya digabungkan ke `public/models/omen-character.glb` (3.530.500 byte). Seluruh sampler, keyframe buffer, dan nama target dua klip hasil gabungan cocok dengan sumber. Bundle memiliki tujuh klip, satu mesh/skin, dan semua buffer view berada dalam batas BIN. Manifest: `character-runtime.json`.
+
+Run memakai klip asli 1× ketika Shift + gerak. Berhenti mengembalikan idle, lalu standing-relax aktif setelah 5 detik. Root XZ walk/run/relax diselaraskan ke bind pose; ini menghapus offset awal Z sekitar 0,338 pada ekspor run agar model tetap sejajar dengan collider. Pose dan gerak vertikal asli tetap dipertahankan. Unit test mencakup offset ini dan memastikan klip sumber tidak berubah.
+
+Uji Chrome headless pada development dan production mengonfirmasi `standing_relax` → `walk` → `run` → `walk` → `idle` → `standing_relax`, termasuk action run dengan weight 1/playback 1× dan root XZ pada anchor bind pose. Uji gerak memakai event keyboard DOM melalui controller yang sama, tanpa mengubah posisi/kecepatan/action secara langsung. Input Space dan Escape menggunakan keyboard browser. Selama menu terbuka, timer, posisi hips, dan quaternion hips tidak berubah; mixer timeScale 0. Space dari standing-relax memakai jump lalu kembali idle setelah mendarat. Production hanya meminta `/models/omen-character.glb` sebesar 3.530.500 byte, tanpa page error.
+
+## Pembaruan animasi sebelumnya — 7 Oktober
 
 8 GLB baru disalin tanpa mengubah Downloads. Entry aktif diganti menjadi `chibi-animation-source.glb` dengan lima klip (`sit`, `defeat_03`, `jump`, `idle`, `walk`). `defeat_02` tersedia pada GLB terpisah. Run dan standing-relax mempunyai 0 klip. Web memakai idle/walk/jump asli; sit/defeat tersimpan untuk interaksi berikutnya, dan run tetap walk dipercepat.
 
@@ -26,7 +45,7 @@ Pemeriksaan production setelah build animasi baru mengonfirmasi bundle aktif dan
 | --- | --- |
 | Loading → exterior preview → cinematic → third-person | Berfungsi; cinematic selesai otomatis |
 | Lewati intro | Langsung memberikan kontrol |
-| Model Omen asli | Berhasil dimuat dan tampil; bundle aktif 3.072.132 byte |
+| Model Omen asli | Berhasil dimuat dan tampil; bundle aktif terbaru 3.530.500 byte |
 | WASD dan Shift | Karakter bergerak; Shift meningkatkan kecepatan |
 | Idle → lompat → idle | Bone torso bergerak saat diam; lompat memakai pose udara dan kembali idle setelah mendarat |
 | Space | Karakter naik dan mendarat di lantai yang sama |
@@ -66,6 +85,6 @@ Pada pemeriksaan normal produksi tidak terdeteksi page error. Console memiliki d
 - Belum diuji pada ponsel fisik, Safari/Firefox, GPU lain, jaringan publik, atau hosting.
 - Kamera dibatasi ke dalam dinding, tetapi belum memiliki collision sweep terhadap seluruh furniture.
 - Jubah model sumber memiliki artefak auto-rig pada beberapa pose. Material ditampilkan dua sisi; perbaikan skin weights/jubah belum dilakukan.
-- Run dan standing-relax belum berisi klip; run memakai walk dipercepat. Sit/defeat belum ditautkan ke aksi portfolio. Jump menggunakan excerpt satu hop, bukan seluruh rangkaian hop pada klip sumber.
+- Sit/defeat belum ditautkan ke aksi portfolio. Jump menggunakan excerpt satu hop, bukan seluruh rangkaian hop pada klip sumber.
 - Concept art/storyboard asli belum tersedia. Environment procedural masih placeholder, bukan environment final berdasarkan gambar yang sudah diimpor.
 - Isi portfolio masih draft dari konteks prototipe sebelumnya.

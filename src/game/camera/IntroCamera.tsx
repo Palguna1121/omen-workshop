@@ -8,30 +8,30 @@ export const introShots = [
   {
     title: "Rumah untuk segala ide",
     label: "Exterior",
-    position: [18, 11, 23],
-    target: [0, 1.2, 0],
+    position: [19, 8.6, 31],
+    target: [-17, 3.2, -4],
     duration: 0,
   },
   {
     title: "Ada sesuatu di dalam",
     label: "Approach",
-    position: [6, 4.5, 13],
-    target: [0, 1.6, 1],
-    duration: 3.2,
+    position: [8.5, 3.6, 21],
+    target: [-3, 2, 4],
+    duration: 3.4,
   },
   {
     title: "Pintunya selalu terbuka",
     label: "Entrance",
-    position: [0, 2.9, 7.7],
-    target: [0, 1.4, -1],
-    duration: 2.4,
+    position: [1.6, 2.4, 14.5],
+    target: [0, 1.7, 3],
+    duration: 2.6,
   },
   {
     title: "Selamat datang di workshop",
-    label: "Interior hub",
-    position: [0, 2.95, 4.65],
-    target: [0, 1.3, 0.5],
-    duration: 3.2,
+    label: "Halaman",
+    position: [0, 2.62, 12.95],
+    target: [0, 1.5, 9.5],
+    duration: 2.4,
   },
 ];
 
@@ -44,8 +44,9 @@ export function IntroCamera() {
     if (camera instanceof PerspectiveCamera) {
       camera.setFocalLength(camera.getFilmHeight() / (2 * Math.tan(45 * Math.PI / 360)));
     }
-    camera.position.set(18, 11, 23);
-    target.set(-2, 1.2, 0);
+    const [first] = introShots;
+    camera.position.set(...(first.position as [number, number, number]));
+    target.set(...(first.target as [number, number, number]));
     camera.lookAt(target);
     if (phase !== "intro") return;
     const timeline = gsap.timeline({

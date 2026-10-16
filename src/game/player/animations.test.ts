@@ -42,7 +42,7 @@ test("idle bernapas dengan kaki tetap menapak, loop utuh dan walk sumber tetap u
   assert.deepEqual(Array.from(clips[0].tracks[0].values), [0, 1, 0, 0, Math.fround(1.1), 0]);
 });
 
-test("klip asli dipakai, walk in-place, dan jump tidak menambahkan root motion atau mengulang hop", () => {
+test("klip asli dipakai, walk/run/relax in-place, dan jump tidak menambahkan root motion atau mengulang hop", () => {
   const scene = new Group();
   const hips = new Bone();
   hips.name = "mixamorigHips";
@@ -51,12 +51,18 @@ test("klip asli dipakai, walk in-place, dan jump tidak menambahkan root motion a
   const idle = new AnimationClip("idle", 15, [new VectorKeyframeTrack(position, [0, 15], [0, 1, 0, 0.1, 1.02, 0.03])]);
   const walk = new AnimationClip("walk", 1, [new VectorKeyframeTrack(position, [0, 1], [0, 1, 0, 2, 1.1, 3])]);
   const jump = new AnimationClip("jump", 2, [new VectorKeyframeTrack(position, [0, 0.2, 0.4, 0.6, 2], [0, 1, 0, 0.1, 1.5, 0.2, 0.2, 0.9, 0.3, 0.3, 1.6, 0.4, 0.4, 1, 0.5])]);
-  const sources = [idle, walk, jump];
+  const run = new AnimationClip("run", 1.25, [new VectorKeyframeTrack(position, [0, 1.25], [0.02, 1, 0.34, 4, 1.2, 5])]);
+  const relax = new AnimationClip("standing_relax", 17.58, [new VectorKeyframeTrack(position, [0, 17.58], [0, 1, 0, 0.2, 0.95, 0.15])]);
+  const sources = [idle, walk, jump, run, relax];
   const original = sources.map((clip) => JSON.stringify(AnimationClip.toJSON(clip)));
-  const clips = prepareCharacterClips(sources, scene, { idle: "idle", walk: "walk", run: "run", jump: "jump" }, { startFrame: 0, endFrame: 11, fps: 24 });
-  assert.equal(clips.length, 3, "klip prosedural tidak ditambahkan saat klip asli ada");
+  const clips = prepareCharacterClips(sources, scene, { idle: "idle", walk: "walk", run: "run", jump: "jump", relax: "standing_relax" }, { startFrame: 0, endFrame: 11, fps: 24 });
+  assert.equal(clips.length, 5, "klip prosedural tidak ditambahkan saat klip asli ada");
   assert.deepEqual(Array.from(clips[0].tracks[0].values), Array.from(idle.tracks[0].values), "idle mempertahankan weight shift");
   assert.deepEqual(Array.from(clips[1].tracks[0].values), [0, 1, 0, 0, Math.fround(1.1), 0]);
+  assert.equal(clips[3].duration, run.duration);
+  assert.equal(clips[4].duration, relax.duration);
+  assert.deepEqual(Array.from(clips[3].tracks[0].values), [0, 1, 0, 0, Math.fround(1.2), 0]);
+  assert.deepEqual(Array.from(clips[4].tracks[0].values), [0, 1, 0, 0, Math.fround(0.95), 0]);
   const excerpt = clips[2];
   assert.ok(excerpt.validate());
   assert.ok(excerpt.duration < 0.5 && excerpt.duration > 0.3);

@@ -115,6 +115,7 @@ function Model({ url }: { url: string }) {
   }, [gltf]);
   const { actions, mixer } = useAnimations(clips, scene);
   const current = useRef("");
+  const stationaryTime = useRef(0);
   useEffect(() => {
     const idle = actions[characterAsset.animations.idle];
     const jump = actions[characterAsset.animations.jump];
@@ -126,9 +127,14 @@ function Model({ url }: { url: string }) {
     };
   }, [actions]);
   // Perbarui state sebelum mixer/physics agar jump dimulai pada frame input.
-  useFrame(() => {
+  useFrame((_, delta) => {
     const state = useGameStore.getState();
-    pauseCharacterAnimation(mixer, state.phase === "playing" && (!!state.section || state.menuOpen));
+    const paused = state.phase === "playing" && (!!state.section || state.menuOpen);
+    pauseCharacterAnimation(mixer, paused);
+    if (paused) return;
+    stationaryTime.current = state.phase === "playing" && runtime.grounded && runtime.speed <= 0.15
+      ? stationaryTime.current + delta
+      : 0;
     const configured =
       !runtime.grounded
         ? characterAsset.animations.jump
@@ -136,7 +142,9 @@ function Model({ url }: { url: string }) {
         ? characterAsset.animations.run
         : runtime.speed > 0.15
           ? characterAsset.animations.walk
-          : characterAsset.animations.idle;
+          : stationaryTime.current >= characterAsset.relaxAfterSeconds && actions[characterAsset.animations.relax]
+            ? characterAsset.animations.relax
+            : characterAsset.animations.idle;
     const desired = actions[configured] ? configured : characterAsset.animations.walk;
     if (desired !== current.current && actions[desired]) {
       actions[current.current]?.fadeOut(0.2);

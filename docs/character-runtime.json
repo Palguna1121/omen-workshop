@@ -1,0 +1,28 @@
+{
+  "entry": "/models/omen-character.glb",
+  "bytes": 3530500,
+  "sha256": "1991228fd5b6362464cd353cee676db13fb80ad9c9594c44bb6b4936f9a45b22",
+  "sources": [
+    {
+      "file": "chibi-animation-source.glb",
+      "sha256": "cdbda0b81f7ab376aee7343220fb64e122a8b6d7aa2b6cd8a0064725c00104f7"
+    },
+    {
+      "file": "chibi-omen-run.glb",
+      "sha256": "459c8874b12b30e80a9f7d17e80a49b8b111d6781a1eea2316bfabae7d84c18c"
+    },
+    {
+      "file": "chibi-omen-standing-relax.glb",
+      "sha256": "1de07f43a3a415433fdd93a21a69c90884fdd001d0447611045e9d61e5c66334"
+    }
+  ],
+  "clips": [
+    "sit",
+    "defeat_03",
+    "jump",
+    "idle",
+    "walk",
+    "run",
+    "standing_relax"
+  ]
+}

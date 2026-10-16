@@ -13,7 +13,7 @@ import {
   type Object3D,
 } from "three";
 
-export function inPlaceAnimations(clips: AnimationClip[], names?: readonly string[]) {
+export function inPlaceAnimations(clips: AnimationClip[], names?: readonly string[], scene?: Object3D) {
   return clips.map((source) => {
     const clip = source.clone();
     if (names && !names.includes(source.name)) return clip;
@@ -22,10 +22,14 @@ export function inPlaceAnimations(clips: AnimationClip[], names?: readonly strin
         track instanceof VectorKeyframeTrack &&
         /(?:hips|root)\.position$/i.test(track.name)
       ) {
-        // Pertahankan gerakan vertikal, hilangkan root motion horizontal.
+        // Ekspor run dimulai dengan offset Z. Gunakan anchor bind pose agar
+        // model tetap sejajar dengan collider ketika klip berganti.
+        const root = scene?.getObjectByName(track.name.slice(0, -".position".length));
+        const x = root?.position.x ?? track.values[0];
+        const z = root?.position.z ?? track.values[2];
         for (let i = 0; i < track.values.length; i += 3) {
-          track.values[i] = track.values[0];
-          track.values[i + 2] = track.values[2];
+          track.values[i] = x;
+          track.values[i + 2] = z;
         }
       }
     }
@@ -36,11 +40,11 @@ export function inPlaceAnimations(clips: AnimationClip[], names?: readonly strin
 export function prepareCharacterClips(
   clips: AnimationClip[],
   scene: Object3D,
-  names: { idle: string; walk: string; run: string; jump: string },
+  names: { idle: string; walk: string; run: string; jump: string; relax?: string },
   segment: { startFrame: number; endFrame: number; fps: number },
 ) {
   // Idle mempertahankan perpindahan berat badan lokal dari animator.
-  const prepared = inPlaceAnimations(clips, [names.walk, names.run]);
+  const prepared = inPlaceAnimations(clips, [names.walk, names.run, ...(names.relax ? [names.relax] : [])], scene);
   const jumpIndex = prepared.findIndex((clip) => clip.name === names.jump);
   if (jumpIndex !== -1) {
     const excerpt = AnimationUtils.subclip(

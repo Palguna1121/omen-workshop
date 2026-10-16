@@ -3,23 +3,25 @@ import assert from "node:assert/strict";
 import { findNearestStation } from "./proximity";
 
 describe("Interaksi berdasarkan jarak", () => {
-  test("area tengah tidak membuka stasiun yang jauh", () => {
+  test("area tengah, halaman spawn, dan titik jauh tidak membuka stasiun", () => {
     assert.equal(findNearestStation(0, 0), null);
+    assert.equal(findNearestStation(0, 9.5), null);
     assert.equal(findNearestStation(100, 100), null);
   });
   test("semua objek hub dapat ditemukan", () => {
-    assert.equal(findNearestStation(-4, -2.8), "skills");
-    assert.equal(findNearestStation(3.7, -2.8), "projects");
-    assert.equal(findNearestStation(4.8, 0.2), "experience");
-    assert.equal(findNearestStation(-4.4, 1.7), "about");
-    assert.equal(findNearestStation(0, -4.2), "journey");
-    assert.equal(findNearestStation(4.3, 3.3), "featured");
+    assert.equal(findNearestStation(-3.3, -3.0), "skills");
+    assert.equal(findNearestStation(3.3, -3.0), "projects");
+    assert.equal(findNearestStation(4.5, 2.6), "experience");
+    assert.equal(findNearestStation(-3.8, 1.3), "about");
+    assert.equal(findNearestStation(0, -3.6), "journey");
+    assert.equal(findNearestStation(4.2, -0.9), "featured");
   });
   test("batas radius inklusif tanpa membuka objek di luar radius", () => {
-    assert.equal(findNearestStation(-6.25, -2.8), "skills");
-    assert.equal(findNearestStation(-6.26, -2.8), null);
+    assert.equal(findNearestStation(-5.5, -3.0), "skills");
+    assert.equal(findNearestStation(-5.51, -3.0), null);
   });
   test("area radius yang tumpang tindih memilih objek paling dekat", () => {
-    assert.equal(findNearestStation(4.4, -1.1), "experience");
+    assert.equal(findNearestStation(4.4, 0.9), "experience");
+    assert.equal(findNearestStation(4.3, 0.6), "featured");
   });
 });

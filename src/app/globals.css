@@ -9,6 +9,7 @@
   --accent: #bb855a;
   --serif: "Lora", Georgia, serif;
   --sans: "Manrope", sans-serif;
+  --dusk-ready: 1;
 }
 * {
   box-sizing: border-box;
@@ -1592,4 +1593,175 @@ kbd {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ===== Tema dusk untuk dunia 3D =====
+   Scene sunset ungu-jingga butuh teks terang dan panel kaca gelap.
+   Hanya berlaku di .game-shell; halaman portfolio HTML tetap memakai tema kertas. */
+.game-shell {
+  --dusk-ink: #fff1e4;
+  --dusk-muted: #dcc4d4;
+  --dusk-amber: #ffb35c;
+  --dusk-violet: #9b5cff;
+  --dusk-glass: #1a1129b8;
+  --dusk-line: #ffd9bd26;
+  background: #1c1430;
+  color: var(--dusk-ink);
+}
+.game-shell .game-header,
+.game-shell .brand-subtitle {
+  color: var(--dusk-ink);
+}
+.game-shell .brand-mark {
+  border-color: #ffe6cc40;
+  background: #1a112966;
+  backdrop-filter: blur(8px);
+}
+.game-shell .icon-button {
+  color: var(--dusk-ink);
+  border-color: var(--dusk-line);
+  background: var(--dusk-glass);
+}
+.game-shell .icon-button:hover {
+  background: #2a1b40e0;
+}
+.game-shell .portfolio-link {
+  color: var(--dusk-ink);
+}
+.phase-ready .game-canvas:after {
+  background: linear-gradient(90deg, #140c22f0, #140c22b0 30%, #140c2200 58%);
+}
+.game-shell .welcome-copy .eyebrow,
+.game-shell .scene-caption .eyebrow,
+.game-shell .hub-label .eyebrow {
+  color: var(--dusk-muted);
+}
+.game-shell .status-dot {
+  background: var(--dusk-amber);
+  box-shadow: 0 0 0 4px #ffb35c26, 0 0 12px #ffb35c;
+}
+.game-shell .welcome-copy h1 {
+  color: var(--dusk-ink);
+  text-shadow: 0 2px 30px #140c2299;
+}
+.game-shell .welcome-copy h1 em {
+  color: var(--dusk-amber);
+}
+.game-shell .welcome-copy p {
+  color: var(--dusk-muted);
+}
+.game-shell .welcome-footnote,
+.game-shell .welcome-footer {
+  color: #c9b0c4;
+}
+.game-shell .button-dark {
+  background: linear-gradient(135deg, #7b3fe4, #5a2a9c);
+  color: #fff6ec;
+  box-shadow: 0 10px 30px #7b3fe455, inset 0 1px 0 #ffffff2a;
+}
+.game-shell .button-dark:hover {
+  background: linear-gradient(135deg, #8d52f2, #6a33b4);
+}
+.game-shell .caption-line {
+  background: var(--dusk-amber);
+}
+.game-shell .scene-caption div > span:last-child {
+  color: var(--dusk-ink);
+}
+.game-shell .cinematic-top,
+.game-shell .cinematic-bottom {
+  background: #120b1de8;
+}
+.game-shell .intro-caption {
+  text-shadow: 0 2px 18px #140c22;
+}
+.game-shell .intro-steps .active {
+  background: var(--dusk-amber);
+}
+.game-shell .phase-intro .icon-button,
+.phase-intro.game-shell .icon-button {
+  color: var(--dusk-ink);
+}
+.phase-playing.game-shell .game-header {
+  background: linear-gradient(#140c22a8, transparent);
+}
+.game-shell .hub-label h2 {
+  color: var(--dusk-ink);
+  text-shadow: 0 2px 14px #140c22;
+}
+.game-shell .discovery,
+.game-shell .interaction-prompt button,
+.game-shell .explore-hint,
+.game-shell .controls-guide,
+.game-shell .world-marker,
+.game-shell .touch-jump {
+  color: var(--dusk-ink);
+  background: var(--dusk-glass);
+  border: 1px solid var(--dusk-line);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px #0a061466;
+}
+.game-shell .discovery small,
+.game-shell .interaction-prompt small {
+  color: var(--dusk-muted);
+}
+.game-shell .discovery-dots i {
+  background: #ffffff2e;
+}
+.game-shell .discovery-dots .seen {
+  background: var(--dusk-amber);
+  box-shadow: 0 0 6px var(--dusk-amber);
+}
+.game-shell .marker-arrow {
+  color: var(--dusk-amber);
+}
+.game-shell .marker-dot {
+  box-shadow: 0 0 8px currentColor;
+}
+.game-shell kbd {
+  color: var(--dusk-ink);
+  background: #ffffff14;
+  border-color: #ffe6cc40;
+}
+.game-shell .loading-screen {
+  background: radial-gradient(circle at 50% 40%, #3a1f4f, #140c22 70%);
+  color: var(--dusk-ink);
+}
+.game-shell .loading-screen p,
+.game-shell .loading-screen .quiet-link {
+  color: var(--dusk-muted);
+}
+.game-shell .loading-track {
+  background: #ffffff1f;
+}
+.game-shell .loading-track span {
+  background: linear-gradient(90deg, var(--dusk-violet), var(--dusk-amber));
+}
+.game-shell .loading-house,
+.game-shell .loading-house:before,
+.game-shell .loading-house span {
+  border-color: var(--dusk-amber);
+}
+.game-shell .loading-house:before {
+  background: #2a173c;
+}
+.game-shell .loading-house span {
+  background: var(--dusk-amber);
+  box-shadow: 0 0 14px var(--dusk-amber);
+}
+.game-shell .joystick {
+  border-color: var(--dusk-line);
+  background: var(--dusk-glass);
+}
+.game-shell .touch-interact,
+.game-shell .touch-camera-hint {
+  color: var(--dusk-ink);
+  background: var(--dusk-glass);
+  border: 1px solid var(--dusk-line);
+  backdrop-filter: blur(10px);
+}
+.game-shell .joystick span {
+  background: linear-gradient(135deg, #8d52f2, #5a2a9c);
+  border-color: #c9a7ff80;
+  box-shadow: 0 0 14px #7b3fe480;
 }

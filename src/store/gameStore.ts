@@ -2,6 +2,8 @@ import { create } from "zustand";
 import type { SectionId } from "@/game/config";
 
 export type GamePhase = "loading" | "ready" | "intro" | "playing";
+/** low: tanpa post/shadow; medium: bloom+SMAA; high: + ambient occlusion. */
+export type Quality = "low" | "medium" | "high";
 type GameState = {
   phase: GamePhase;
   introStep: number;
@@ -9,7 +11,7 @@ type GameState = {
   nearest: SectionId | null;
   menuOpen: boolean;
   audioEnabled: boolean;
-  quality: "low" | "medium";
+  quality: Quality;
   reducedMotion: boolean;
   visited: SectionId[];
   ready: () => void;
@@ -22,7 +24,7 @@ type GameState = {
   closeSection: () => void;
   toggleMenu: () => void;
   setAudio: (enabled: boolean) => void;
-  configure: (quality: "low" | "medium", reducedMotion: boolean) => void;
+  configure: (quality: Quality, reducedMotion: boolean) => void;
 };
 
 export const useGameStore = create<GameState>((set, get) => ({

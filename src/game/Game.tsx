@@ -18,6 +18,7 @@ import { IntroCamera } from "./camera/IntroCamera";
 import { GameCamera } from "./camera/GameCamera";
 import { InteractionSystem } from "./interaction/InteractionSystem";
 import { AudioHelper } from "./audio/AudioHelper";
+import { Effects } from "./Effects";
 import { HUD } from "@/ui/HUD";
 import { ProjectPanel } from "@/ui/ProjectPanel";
 import { LoadingScreen } from "@/ui/LoadingScreen";
@@ -113,7 +114,7 @@ function GameCanvas() {
         <Canvas
           shadows={quality !== "low" ? { type: PCFShadowMap } : false}
           dpr={quality === "low" ? 1 : [1, 1.5]}
-          camera={{ position: [18, 11, 23], fov: 45, near: 0.1, far: 100 }}
+          camera={{ position: [19, 8.6, 31], fov: 45, near: 0.1, far: 1200 }}
           gl={{
             antialias: !device.low,
             powerPreference: "high-performance",
@@ -135,46 +136,18 @@ function GameCanvas() {
             );
           }}
         >
-          <color attach="background" args={["#c4cdc0"]} />
-          <fog attach="fog" args={["#c4cdc0", 28, 65]} />
-          <ambientLight intensity={phase === "playing" ? 0.48 : 0.9} color="#ffecd0" />
-          <hemisphereLight args={["#d8e8e6", "#705745", phase === "playing" ? 0.7 : 1.2]} />
-          <directionalLight
-            position={[-8, 16, 10]}
-            intensity={2.2}
-            color="#ffe4b8"
-            castShadow={quality !== "low"}
-            shadow-mapSize={1024}
-            shadow-camera-left={-18}
-            shadow-camera-right={18}
-            shadow-camera-top={18}
-            shadow-camera-bottom={-18}
-            shadow-bias={-0.001}
-          />
-          <spotLight
-            position={[0, 3.55, 0.8]}
-            color="#ffdeb0"
-            intensity={45}
-            angle={1.15}
-            penumbra={0.65}
-            distance={11}
-            decay={2}
-            castShadow={quality !== "low"}
-            shadow-mapSize={512}
-            shadow-bias={-0.002}
-            shadow-camera-near={0.2}
-            shadow-camera-far={12}
-          />
+          <color attach="background" args={["#1c1430"]} />
           <Suspense fallback={null}>
             <Physics gravity={[0, playerMotion.gravity, 0]} paused={paused} timeStep={1 / 60}>
               <World />
               <Player />
               <InteractionSystem />
               <SceneReady />
+              <GameCamera />
             </Physics>
           </Suspense>
           <IntroCamera />
-          <GameCamera />
+          <Effects />
         </Canvas>
       </div>
       <HUD />

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useGameStore } from "@/store/gameStore";
 
 // Sintesis lokal: tidak ada download musik atau audio berlisensi.
+// Lapisan: drone hangat, angin senja, dan jangkrik.
 let context: AudioContext | null = null;
 
 export async function enableAudioFromGesture() {
@@ -31,6 +32,52 @@ export function AudioHelper() {
       oscillator.start();
       return oscillator;
     });
+    // Angin senja: noise lowpass dengan hembusan pelan dari LFO.
+    const noise = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const wind = audio.createBufferSource();
+    wind.buffer = noise;
+    wind.loop = true;
+    const windFilter = audio.createBiquadFilter();
+    windFilter.type = "lowpass";
+    windFilter.frequency.value = 520;
+    const windGain = audio.createGain();
+    windGain.gain.value = 0.55;
+    const gust = audio.createOscillator();
+    gust.frequency.value = 0.08;
+    const gustDepth = audio.createGain();
+    gustDepth.gain.value = 0.35;
+    gust.connect(gustDepth).connect(windGain.gain);
+    wind.connect(windFilter).connect(windGain).connect(master);
+    wind.start();
+    gust.start();
+    // Jangkrik: denyut pendek bernada tinggi pada jeda acak.
+    const crickets = audio.createGain();
+    crickets.gain.value = 0.35;
+    crickets.connect(master);
+    let chirpTimer = 0;
+    const chirp = () => {
+      const start = audio.currentTime + 0.02;
+      const tone = audio.createOscillator();
+      const env = audio.createGain();
+      tone.frequency.value = 4200 + Math.random() * 600;
+      env.gain.value = 0;
+      for (let i = 0; i < 3; i++) {
+        env.gain.setValueAtTime(0, start + i * 0.06);
+        env.gain.linearRampToValueAtTime(1, start + i * 0.06 + 0.01);
+        env.gain.linearRampToValueAtTime(0, start + i * 0.06 + 0.04);
+      }
+      tone.connect(env).connect(crickets);
+      tone.start(start);
+      tone.stop(start + 0.25);
+      tone.onended = () => {
+        tone.disconnect();
+        env.disconnect();
+      };
+      chirpTimer = window.setTimeout(chirp, 600 + Math.random() * 2200);
+    };
+    chirp();
     const mute = () =>
       master.gain.setTargetAtTime(
         document.hidden ? 0 : 0.018,
@@ -45,6 +92,14 @@ export function AudioHelper() {
         osc.stop();
         osc.disconnect();
       });
+      window.clearTimeout(chirpTimer);
+      wind.stop();
+      gust.stop();
+      wind.disconnect();
+      gust.disconnect();
+      windFilter.disconnect();
+      windGain.disconnect();
+      crickets.disconnect();
       master.disconnect();
     };
   }, [enabled, phase]);

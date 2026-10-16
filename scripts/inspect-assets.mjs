@@ -28,7 +28,7 @@ const inventory = files(root).map(file => {
   return item;
 });
 if (source && JSON.stringify(files(source)) !== JSON.stringify(files(root))) throw new Error('Source and destination inventories differ');
-const report = {entry:'/models/omen/chibi-animation-source.glb',files:inventory.length,totalBytes:inventory.reduce((sum,item)=>sum+item.bytes,0),copyVerifiedAgainst:source,inventory};
+const report = {entry:'/models/omen-character.glb',files:inventory.length,totalBytes:inventory.reduce((sum,item)=>sum+item.bytes,0),copyVerifiedAgainst:source,inventory};
 fs.mkdirSync('docs',{recursive:true});
 fs.writeFileSync('docs/model-inventory.json',JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({entry:report.entry,files:report.files,totalBytes:report.totalBytes,copyVerified:!!source,models:inventory.filter(item=>item.animations)},null,2));

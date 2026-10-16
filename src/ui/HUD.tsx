@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useGameStore } from "@/store/gameStore";
+import { useGameStore, type Quality } from "@/store/gameStore";
 import { stations } from "@/game/config";
 import { introShots } from "@/game/camera/IntroCamera";
 import { enableAudioFromGesture } from "@/game/audio/AudioHelper";
@@ -215,13 +215,14 @@ export function HUD() {
                 value={quality}
                 onChange={(event) =>
                   state().configure(
-                    event.target.value as "low" | "medium",
+                    event.target.value as Quality,
                     state().reducedMotion,
                   )
                 }
               >
                 <option value="low">Ringan</option>
                 <option value="medium">Standar</option>
+                <option value="high">Tinggi (AO)</option>
               </select>
             </label>
             <button

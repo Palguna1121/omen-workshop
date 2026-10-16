@@ -10,7 +10,7 @@ export type IconName =
   | "about"
   | "journey"
   | "featured";
-const paths: Record<IconName, string> = {
+export const iconPaths: Record<IconName, string> = {
   arrow: "M5 12h14m-6-6 6 6-6 6",
   sound: "M11 5 6 9H3v6h3l5 4V5Zm4 3a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14",
   mute: "M11 5 6 9H3v6h3l5 4V5Zm5 5 5 5m0-5-5 5",
@@ -37,7 +37,7 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d={paths[name]} />
+      <path d={iconPaths[name]} />
     </svg>
   );
 }

@@ -1,244 +1,129 @@
 import { CuboidCollider, RigidBody } from "@react-three/rapier";
-import { Block, Plant } from "./Primitives";
+import { Banner } from "./House";
+import { GARAGE, GROUND_TOP } from "./layout";
+import { Lamp, StringLights, WallSconce } from "./Lanterns";
+import { Block } from "./Primitives";
+import { palette, surface } from "./palette";
+import { StaticBatch } from "./StaticBatch";
+import { plankTexture, roofTexture, stuccoTexture } from "./textures";
 
-function Desk({ x, workbench = false }: { x: number; workbench?: boolean }) {
-  return (
-    <group position={[x, 0, -3.3]}>
-      <Block position={[0, 1, 0]} size={[2.7, 0.14, 1.15]} color="#a3774d" />
-      {[-1.15, 1.15].map((v) => (
-        <Block
-          key={v}
-          position={[v, 0.5, 0]}
-          size={[0.15, 1, 0.9]}
-          color="#536760"
-        />
-      ))}
-      {workbench ? (
-        <>
-          <Block
-            position={[0, 2.2, -1.48]}
-            size={[2.6, 1.6, 0.1]}
-            color="#ab936d"
-          />
-          <Block
-            position={[-0.5, 1.17, 0]}
-            size={[0.85, 0.16, 0.7]}
-            color="#556b67"
-          />
-          <Block
-            position={[0.6, 1.2, -0.05]}
-            size={[0.6, 0.25, 0.65]}
-            color="#c7bd9d"
-          />
-          <Block
-            position={[0.6, 1.34, -0.05]}
-            size={[0.65, 0.05, 0.7]}
-            color="#e3c393"
-          />
-        </>
-      ) : (
-        <>
-          <Block
-            position={[0, 1.65, -0.25]}
-            size={[1.7, 1, 0.12]}
-            color="#354945"
-          />
-          <Block
-            position={[0, 1.65, -0.175]}
-            size={[1.5, 0.8, 0.03]}
-            color="#244c45"
-            emissive="#326f63"
-          />
-          {Array.from({ length: 5 }, (_, i) => (
-            <Block
-              key={i}
-              position={[-0.22 + (i % 2) * 0.07, 1.91 - i * 0.13, -0.15]}
-              size={[0.85 - (i % 3) * 0.18, 0.025, 0.015]}
-              color={i % 2 ? "#e9c58b" : "#9ac5b2"}
-              emissive="#7abbaa"
-            />
-          ))}
-          <Block
-            position={[0, 1.25, -0.25]}
-            size={[0.15, 0.35, 0.12]}
-            color="#354945"
-          />
-          <Block
-            position={[0, 1.1, 0.2]}
-            size={[1, 0.05, 0.32]}
-            color="#e2d9c6"
-          />
-          <Block
-            position={[1, 1.23, 0]}
-            size={[0.25, 0.32, 0.25]}
-            color="#b7784d"
-          />
-          <Block
-            position={[0, 0.45, 1.1]}
-            size={[0.65, 0.12, 0.65]}
-            color="#678777"
-          />
-          <Block
-            position={[0, 0.82, 1.4]}
-            size={[0.65, 0.7, 0.12]}
-            color="#678777"
-          />
-        </>
-      )}
-    </group>
-  );
-}
+const T = 0.3;
+const H = GARAGE.ceiling;
+const ROOF = H + 0.35;
 
+/** Cangkang garasi: dinding, bukaan rolling door, atap teras, pergola. */
 export function Garage() {
+  const stucco = surface({ color: palette.stucco, map: stuccoTexture(), roughness: 0.95 });
+  const plaster = surface({ color: "#d9a988", map: stuccoTexture(), roughness: 0.95 });
+  const redPanel = surface({ color: "#7a2c36", roughness: 0.8 });
+  const floor = surface({ color: "#ffffff", map: plankTexture("warm"), roughness: 0.42 });
+  const ceiling = surface({ color: "#ffffff", map: plankTexture("dark"), roughness: 0.8 });
+  const roof = surface({ color: "#ffffff", map: roofTexture(), roughness: 0.7 });
+  const width = GARAGE.maxX - GARAGE.minX;
+  const depth = GARAGE.maxZ - GARAGE.minZ;
+  const pillar = GARAGE.maxX - GARAGE.doorHalf + T / 2;
   return (
     <group>
-      <Desk x={-4} />
-      <Desk x={3.7} workbench />
-      <Block
-        position={[-4.8, 0.4, 1.7]}
-        size={[1.4, 0.6, 2.7]}
-        color="#a5b09a"
-      />
-      <Block
-        position={[-5.4, 0.8, 1.7]}
-        size={[0.3, 1.1, 2.7]}
-        color="#899880"
-      />
-      {[-0.9, 0, 0.9].map((z) => (
-        <Block
-          key={z}
-          position={[-4.5, 0.78, 1.7 + z]}
-          size={[0.9, 0.17, 0.83]}
-          color="#bfcaaf"
-        />
-      ))}
-      <Block
-        position={[-3.1, 0.4, 1.6]}
-        size={[0.7, 0.15, 1.5]}
-        color="#8e7054"
-      />
-      <Block
-        position={[-3.1, 0.55, 1.6]}
-        size={[0.4, 0.06, 0.55]}
-        color="#e3d4b7"
-      />
-      <Block
-        position={[-3.4, 0.14, 1.5]}
-        size={[3, 0.035, 3.4]}
-        color="#d7b082"
-      />
-      <Block
-        position={[4.95, 1.2, 0.2]}
-        size={[1.6, 2.4, 0.9]}
-        color="#877357"
-      />
-      {Array.from({ length: 3 }, (_, i) => (
-        <group key={i}>
-          <Block
-            position={[4.94, 0.55 + i * 0.7, 0.7]}
-            size={[1.45, 0.59, 0.04]}
-            color="#665843"
-          />
-          {Array.from({ length: 4 }, (_, j) => (
-            <Block
-              key={j}
-              position={[4.42 + j * 0.29, 0.5 + i * 0.7, 0.76]}
-              size={[0.19, 0.45 - j * 0.04, 0.3]}
-              color={["#b89067", "#8caaa0", "#d6bd8f", "#b08469"][j]}
-            />
-          ))}
+      <StaticBatch>
+        {/* Lantai papan kayu hangat; sedikit glossy untuk pantulan neon. */}
+        <Block position={[0, GROUND_TOP - 0.06, 0]} size={[width, 0.14, depth]} material={floor} map={plankTexture("warm")} tile={2.2} />
+        {/* Dinding: belakang panel merah ala referensi garasi, samping plester hangat. */}
+        <Block position={[0, H / 2, GARAGE.minZ]} size={[width + T, H, T]} material={plaster} map={stuccoTexture()} />
+        <Block position={[0, 2.25, GARAGE.minZ + T / 2 + 0.02]} size={[width - 0.3, 3, 0.04]} material={redPanel} />
+        {[GARAGE.minX, GARAGE.maxX].map((x) => (
+          <Block key={x} position={[x, H / 2, 0]} size={[T, H, depth]} material={plaster} map={stuccoTexture()} />
+        ))}
+        {/* Wainscot kayu dan list atas di semua dinding dalam. */}
+        <Block position={[0, 0.55, GARAGE.minZ + T / 2 + 0.05]} size={[width - 0.3, 0.95, 0.06]} map={plankTexture("dark")} color="#ffffff" />
+        {[GARAGE.minX + T / 2 + 0.03, GARAGE.maxX - T / 2 - 0.03].map((x) => (
+          <Block key={`w${x}`} position={[x, 0.55, 0]} size={[0.06, 0.95, depth - 0.3]} map={plankTexture("dark")} color="#ffffff" />
+        ))}
+        {[GARAGE.minZ + T / 2 + 0.06].map((z) => (
+          <Block key={z} position={[0, 3.78, z]} size={[width - 0.3, 0.12, 0.1]} color={palette.wood} />
+        ))}
+        {/* Pilar depan di kiri-kanan bukaan pintu. */}
+        {[-1, 1].map((s) => (
+          <Block key={`pf${s}`} position={[s * (GARAGE.doorHalf + pillar / 2), H / 2, GARAGE.maxZ]} size={[pillar, H, T]} material={stucco} map={stuccoTexture()} />
+        ))}
+        {/* Header, rumah rolling door, dan rangka kayu bukaan. */}
+        <Block position={[0, (GARAGE.doorTop + H) / 2, GARAGE.maxZ]} size={[GARAGE.doorHalf * 2, H - GARAGE.doorTop, T]} material={stucco} map={stuccoTexture()} />
+        <Block position={[0, GARAGE.doorTop + 0.32, GARAGE.maxZ - 0.35]} size={[GARAGE.doorHalf * 2 - 0.1, 0.5, 0.42]} color={palette.steel} metalness={0.5} roughness={0.5} />
+        <Block position={[0, GARAGE.doorTop + 0.05, GARAGE.maxZ + 0.19]} size={[GARAGE.doorHalf * 2 + 0.3, 0.16, 0.1]} color={palette.woodDeep} />
+        {[-1, 1].map((s) => (
+          <Block key={`jamb${s}`} position={[s * (GARAGE.doorHalf + 0.06), GARAGE.doorTop / 2, GARAGE.maxZ + 0.19]} size={[0.14, GARAGE.doorTop, 0.1]} color={palette.woodDeep} />
+        ))}
+        {/* Neon oranye di atas bukaan garasi, seperti referensi. */}
+        <Block position={[0, GARAGE.doorTop + 0.22, GARAGE.maxZ + 0.28]} size={[GARAGE.doorHalf * 2 - 1.2, 0.07, 0.07]} glowColor={palette.orange} glowIntensity={6} />
+        <Block position={[0, GARAGE.doorTop + 0.22, GARAGE.maxZ + 0.22]} size={[GARAGE.doorHalf * 2 - 1.0, 0.16, 0.06]} color={palette.steel} />
+
+        {/* Plafon papan gelap dengan balok melintang. */}
+        <Block position={[0, H + 0.05, 0]} size={[width, 0.1, depth]} material={ceiling} map={plankTexture("dark")} tile={2.4} />
+        {[-3.4, 0, 3.4].map((z) => (
+          <Block key={`beam${z}`} position={[0, H - 0.14, z]} size={[width - 0.3, 0.26, 0.24]} color={palette.wood} />
+        ))}
+        {[-4, 4].map((x) => (
+          <Block key={`girder${x}`} position={[x, H - 0.3, 0]} size={[0.24, 0.2, depth - 0.3]} color={palette.woodDeep} />
+        ))}
+
+        {/* Atap datar sebagai teras atas: parapet, pagar kayu, pergola. */}
+        <Block position={[0, H + 0.2, 0]} size={[width + 0.6, 0.3, depth + 0.6]} material={stucco} map={stuccoTexture()} />
+        <Block position={[0, H + 0.36, 0]} size={[width - 0.3, 0.04, depth - 0.3]} map={plankTexture("warm")} color="#ffffff" />
+        {[
+          [0, GARAGE.minZ - 0.15, width + 0.6, 0.3],
+          [GARAGE.minX - 0.15, 0, 0.3, depth + 0.6],
+          [GARAGE.maxX + 0.15, 0, 0.3, depth + 0.6],
+          [0, GARAGE.maxZ + 0.15, width + 0.6, 0.3],
+        ].map(([x, z, w, d], i) => (
+          <group key={`parapet${i}`}>
+            <Block position={[x, ROOF + 0.3, z]} size={[w, 0.6, d]} material={stucco} map={stuccoTexture()} />
+            <Block position={[x, ROOF + 0.95, z]} size={[w, 0.08, d * 0.5]} color={palette.wood} />
+          </group>
+        ))}
+        {Array.from({ length: 16 }, (_, i) => (
+          <Block key={`rf${i}`} position={[GARAGE.minX + 0.2 + i * 0.77, ROOF + 0.78, GARAGE.maxZ + 0.15]} size={[0.06, 0.35, 0.06]} color={palette.woodWarm} />
+        ))}
+        {[-4.2, 4.2].flatMap((x) =>
+          [-3.6, 2.6].map((z) => (
+            <Block key={`pg${x}${z}`} position={[x, ROOF + 1.25, z]} size={[0.2, 2.5, 0.2]} color={palette.wood} />
+          )),
+        )}
+        {[-3.6, 2.6].map((z) => (
+          <Block key={`pgb${z}`} position={[0, ROOF + 2.55, z]} size={[9.2, 0.18, 0.22]} color={palette.wood} />
+        ))}
+        {Array.from({ length: 7 }, (_, i) => (
+          <Block key={`pgr${i}`} position={[-4.2 + i * 1.4, ROOF + 2.7, -0.5]} size={[0.12, 0.14, 7.2]} color={palette.woodWarm} />
+        ))}
+        <mesh position={[0, ROOF + 2.45, -0.5]} rotation={[-Math.PI / 2, 0, 0]} material={surface({ color: palette.fabricCream, roughness: 1, side: 2 })}>
+          <planeGeometry args={[8.4, 6.2]} />
+        </mesh>
+
+        {/* Awning genteng di atas pintu garasi. */}
+        <group position={[0, H + 0.62, GARAGE.maxZ + 0.75]} rotation={[0.42, 0, 0]}>
+          <Block size={[width + 0.9, 0.12, 1.75]} material={roof} map={roofTexture()} tile={1.2} />
+          <Block position={[0, -0.05, 0.87]} size={[width + 0.9, 0.2, 0.1]} color={palette.woodDeep} />
         </group>
-      ))}
-      <mesh position={[4.9, 2.7, 0.2]} castShadow>
-        <icosahedronGeometry args={[0.3, 0]} />
-        <meshStandardMaterial
-          color="#d1af5e"
-          metalness={0.45}
-          roughness={0.4}
-        />
-      </mesh>
-      <Block
-        position={[0, 2.1, -4.78]}
-        size={[2.5, 1.45, 0.12]}
-        color="#8f6f51"
-      />
-      <Block
-        position={[0, 2.1, -4.7]}
-        size={[2.32, 1.27, 0.03]}
-        color="#c6b694"
-      />
-      {[-0.7, 0, 0.7].map((x, i) => (
-        <group key={x}>
-          <Block
-            position={[x, 2.2 - (i % 2) * 0.2, -4.66]}
-            size={[0.55, 0.7, 0.025]}
-            rotation={[0, 0, (i - 1) * 0.08]}
-            color="#ece3cd"
-          />
-          <Block
-            position={[x, 2.25 - (i % 2) * 0.2, -4.64]}
-            size={[0.42, 0.42, 0.01]}
-            color={["#8faa98", "#b98d6f", "#a5b7bc"][i]}
-          />
-        </group>
-      ))}
-      <Block
-        position={[-5.78, 2.2, -0.15]}
-        size={[0.12, 1.6, 1.6]}
-        color="#786c53"
-      />
-      <Block
-        position={[-5.69, 2.2, -0.15]}
-        size={[0.03, 1.42, 1.42]}
-        color="#bdd4c1"
-        emissive="#bbc8a8"
-      />
-      <Block
-        position={[-5.64, 2.2, -0.15]}
-        size={[0.05, 1.42, 0.06]}
-        color="#786c53"
-      />
-      <Block
-        position={[-5.64, 2.2, -0.15]}
-        size={[0.05, 0.06, 1.42]}
-        color="#786c53"
-      />
-      <Plant position={[-5.1, 0.13, -4.25]} />
-      <Plant position={[-5.2, 0.13, 3.7]} scale={1.3} />
-      <Plant position={[2.1, 0.13, -4.2]} scale={0.85} />
-      {[-3.5, 3.5].map((x) => (
-        <group key={x}>
-          <Block
-            position={[x, 3.45, -1.8]}
-            size={[0.025, 1, 0.025]}
-            color="#554e40"
-          />
-          <mesh position={[x, 2.95, -1.8]}>
-            <coneGeometry args={[0.45, 0.3, 12]} />
-            <meshStandardMaterial
-              color="#c69560"
-              emissive="#ffd595"
-              emissiveIntensity={0.5}
-            />
-          </mesh>
-          <pointLight
-            position={[x, 2.8, -1.8]}
-            color="#ffdc9c"
-            intensity={8}
-            distance={8}
-            decay={2}
-          />
-        </group>
-      ))}
+        {[-5.2, -1.7, 1.7, 5.2].map((x) => (
+          <Block key={`br${x}`} position={[x, H + 0.15, GARAGE.maxZ + 0.55]} size={[0.12, 0.12, 0.9]} rotation={[0.42, 0, 0]} color={palette.woodDeep} />
+        ))}
+      </StaticBatch>
+
+      <WallSconce position={[-(GARAGE.doorHalf + pillar / 2 - 0.05), 2.3, GARAGE.maxZ + T / 2 + 0.03]} height={0.95} />
+      <WallSconce position={[GARAGE.doorHalf + pillar / 2 - 0.05, 2.3, GARAGE.maxZ + T / 2 + 0.03]} height={0.95} />
+      <Banner position={[GARAGE.maxX + T / 2 + 0.04, 2.5, 3.6]} rotationY={Math.PI / 2} size={[0.75, 1.6]} />
+      <StringLights from={[-4.2, ROOF + 2.3, -3.6]} to={[4.2, ROOF + 2.3, 2.6]} sag={0.5} count={18} />
+      <StringLights from={[4.2, ROOF + 2.3, -3.6]} to={[-4.2, ROOF + 2.3, 2.6]} sag={0.5} count={18} />
+      <Lamp position={[0, GARAGE.doorTop - 0.1, GARAGE.maxZ + 0.9]} color={palette.orange} intensity={10} distance={9} essential />
+      <Lamp position={[0, ROOF + 1.6, -0.5]} color="#ffd08a" intensity={5} distance={7} />
+
       <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider position={[-4, 0.55, -3.3]} args={[1.35, 0.55, 0.58]} />
-        <CuboidCollider
-          position={[3.7, 0.55, -3.3]}
-          args={[1.35, 0.55, 0.58]}
-        />
-        <CuboidCollider position={[-4.8, 0.55, 1.7]} args={[0.7, 0.55, 1.35]} />
-        <CuboidCollider position={[-3.1, 0.3, 1.6]} args={[0.35, 0.3, 0.75]} />
-        <CuboidCollider position={[4.95, 1.2, 0.2]} args={[0.8, 1.2, 0.45]} />
+        <CuboidCollider position={[0, H / 2, GARAGE.minZ]} args={[width / 2 + T / 2, H / 2, T / 2]} />
+        <CuboidCollider position={[GARAGE.minX, H / 2, 0]} args={[T / 2, H / 2, depth / 2]} />
+        <CuboidCollider position={[GARAGE.maxX, H / 2, 0]} args={[T / 2, H / 2, depth / 2]} />
+        {[-1, 1].map((s) => (
+          <CuboidCollider key={s} position={[s * (GARAGE.doorHalf + pillar / 2), H / 2, GARAGE.maxZ]} args={[pillar / 2, H / 2, T / 2]} />
+        ))}
+        <CuboidCollider position={[0, (GARAGE.doorTop + H) / 2 + 0.1, GARAGE.maxZ - 0.2]} args={[GARAGE.doorHalf, (H - GARAGE.doorTop) / 2 + 0.1, 0.4]} />
+        <CuboidCollider position={[0, H + 0.2, 0]} args={[width / 2 + 0.3, 0.2, depth / 2 + 0.3]} />
       </RigidBody>
     </group>
   );

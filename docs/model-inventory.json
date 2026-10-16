@@ -1,7 +1,7 @@
 {
-  "entry": "/models/omen/chibi-animation-source.glb",
+  "entry": "/models/omen-character.glb",
   "files": 28,
-  "totalBytes": 140110275,
+  "totalBytes": 140567107,
   "copyVerifiedAgainst": "/home/nanaaa/Downloads/omen",
   "inventory": [
     {
@@ -155,20 +155,36 @@
     },
     {
       "file": "chibi-omen-run.glb",
-      "bytes": 2274332,
-      "sha256": "3e81dc19a2dc6d4da428c74282436b123c3b2631e78daec4f0eab7a836185c6c",
-      "animations": [],
-      "animationClips": [],
+      "bytes": 2332996,
+      "sha256": "459c8874b12b30e80a9f7d17e80a49b8b111d6781a1eea2316bfabae7d84c18c",
+      "animations": [
+        "run"
+      ],
+      "animationClips": [
+        {
+          "name": "run",
+          "duration": 1.25,
+          "channels": 195
+        }
+      ],
       "meshes": 1,
       "skins": 1,
       "externalUris": []
     },
     {
       "file": "chibi-omen-standing-relax.glb",
-      "bytes": 2274344,
-      "sha256": "bd1bb0118f71fb419769e0b1b39aa5d3ef95d139482d59a06f3b05b94471864f",
-      "animations": [],
-      "animationClips": [],
+      "bytes": 2672512,
+      "sha256": "1de07f43a3a415433fdd93a21a69c90884fdd001d0447611045e9d61e5c66334",
+      "animations": [
+        "standing_relax"
+      ],
+      "animationClips": [
+        {
+          "name": "standing_relax",
+          "duration": 17.583333333333332,
+          "channels": 195
+        }
+      ],
       "meshes": 1,
       "skins": 1,
       "externalUris": []
