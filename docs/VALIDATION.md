@@ -1,5 +1,26 @@
 # Validasi MVP — 8 Oktober 2026
 
+## Persiapan deploy — 17 Oktober 2026
+
+- `public/models/omen/` (135 MB: master 54 + 45 MB, video WhatsApp 8 MB, sumber animasi) dipindah ke `assets-src/omen/` (gitignored) dan dikeluarkan dari index git; riwayat lama tidak diubah sesuai keputusan pemilik. `npm run prepare:character` dari lokasi baru menghasilkan `omen-character.glb` dengan SHA-256 identik. `public/` kini 3,7 MB.
+- Open Graph & Twitter card: tag `og:*`/`twitter:*` lengkap dengan gambar 1200 × 630 dan alt; `theme-color` #140c22. URL absolut memakai `SITE_URL` atau domain produksi Vercel.
+- Loading bertahap (mesin 3D → Omen & dunia → menyalakan lentera) dengan progres nyata bila tersedia; `<Preload all />` mengompilasi shader sebelum hero. Uji cache dingin: kedua GLB diunduh sekali via `<link rel="preload">` (karakter 2,2 MB transfer, kit 157 KB), tidak ada peringatan preload tak terpakai.
+
+## Widget, peta, kunci kursor, pengaturan — 17 Oktober 2026
+
+- `npm run typecheck`, `npm run lint`, `npm run build`: lolos. `npm run test`: 15/15 lolos (ditambah validasi pengaturan: data rusak, preset → kustom, deteksi perangkat tidak menyimpan).
+- Chrome headless + GPU (produksi, 1440 × 900): widget kiri/kanan atas, minimap, peta besar via Tab (buka/tutup), panel pengaturan via Esc, preset Ringan + slider resolusi lewat panah keyboard + saklar FPS tersimpan dan langsung berlaku (chip 60 FPS). Emulasi iPhone 14: tanpa overflow, panel responsif.
+- Kunci kursor tidak bisa diverifikasi otomatis: headless menolak pointer lock (`WrongDocumentError`) dan jendela headed otomasi di Wayland kehilangan fokus OS (`document.hasFocus() === false`). Jalur gagal (toast petunjuk) terverifikasi. Perlu dicoba manual: M untuk kunci/lepas, Alt (bisa ditolak Chrome karena modifier tunggal bukan gestur), Esc melepas tanpa membuka pengaturan.
+
+## Workshop Omen tanpa portfolio — 17 Oktober 2026
+
+- Halaman `/portfolio`, `/projects`, `/about`, `/experience` dan data portfolio dihapus; build hanya berisi `/` dan 404 (`/portfolio` → 404). Nama pemilik dihapus dari UI dan metadata.
+- `npm run typecheck`, `npm run lint`, `npm run build`: lolos. `npm run test`: 12/12 lolos (spot per lantai, radius, kristal, toggle, ketukan).
+- Uji produksi (Chrome headless + GPU Radeon 780M, 1440 × 900): hero → Masuk (suara menyala) → lewati intro → duduk di sofa → berdiri → duduk di kursi gaming (monitor menyala) → workbench (hologram, printer, percikan) → motor (lampu & getar) → portal ke atap → ketuk pintu dua kali → ambil kristal teras (toast, counter 01/08, tersimpan setelah reload) → kucing bangun → menu kristal. 60 fps di hero dan interior pada kualitas Standar.
+- Bug yang ditemukan dan diperbaiki saat uji: tombol gerak hilang saat berdiri (Controller mengosongkan input ketika status duduk berubah), kristal teras di luar jangkauan, kucing lonjong karena animasi napas menimpa skala dasar, marker HTML menabrak header.
+- Emulasi iPhone 14: hero tanpa overflow, overlay gradien diperkuat agar teks terbaca.
+- Audio tidak bisa didengar di headless; yang diverifikasi adalah AudioContext berjalan (tombol berubah "Suara nyala") dan tidak ada error.
+
 ## Dunia sunset — 16 Oktober 2026
 
 - `npm run typecheck`, `npm run lint`, `npm run build`: lolos. `npm run test`: 11/11 lolos (tes proximity diperbarui ke posisi stasiun baru, ditambah titik spawn halaman).

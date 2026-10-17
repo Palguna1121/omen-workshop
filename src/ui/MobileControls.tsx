@@ -1,11 +1,13 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { requestJump, runtime } from "@/game/runtime";
 import { useGameStore } from "@/store/gameStore";
+import { interact } from "@/game/interaction/actions";
 
 export function MobileControls() {
   const pointer = useRef<number | null>(null);
   const [thumb, setThumb] = useState({ x: 0, y: 0 });
   const nearest = useGameStore((s) => s.nearest);
+  const seated = useGameStore((s) => s.seated);
   const move = (event: PointerEvent<HTMLDivElement>) => {
     if (pointer.current !== event.pointerId) return;
     const rect = event.currentTarget.getBoundingClientRect();
@@ -46,12 +48,9 @@ export function MobileControls() {
       <button className="touch-jump" onClick={requestJump}>
         Lompat <span aria-hidden="true">↑</span>
       </button>
-      {nearest && (
-        <button
-          className="touch-interact"
-          onClick={() => useGameStore.getState().openSection(nearest)}
-        >
-          Buka <span>↗</span>
+      {(nearest || seated) && (
+        <button className="touch-interact" onClick={() => interact(nearest)}>
+          {seated ? "Berdiri" : "Aksi"} <span aria-hidden="true">✦</span>
         </button>
       )}
       <span className="touch-camera-hint">Geser layar untuk melihat</span>

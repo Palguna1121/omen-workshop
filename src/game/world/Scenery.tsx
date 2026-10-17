@@ -14,6 +14,7 @@ import {
   SphereGeometry,
 } from "three";
 import { useGameStore } from "@/store/gameStore";
+import { useSettings } from "@/store/settingsStore";
 import { FOG, PLOT, SEA_LEVEL, SUN_VISUAL, sky } from "./environment";
 import { KitInstances, type KitItem, type KitName } from "./Kit";
 import { glow, palette, surface } from "./palette";
@@ -196,7 +197,7 @@ const jungleKinds: KitName[] = ["palm_tall", "tree_round", "palm_bend", "tree_oa
 
 /** Hutan tropis jauh dari pohon kit; tanpa bayangan, satu draw call per jenis bagian. */
 function Jungle() {
-  const quality = useGameStore((s) => s.quality);
+  const sparse = useSettings((s) => s.graphics.preset === "low");
   const groups = useMemo(() => {
     const points = scatter(
       520,
@@ -223,7 +224,7 @@ function Jungle() {
         <KitInstances
           key={name}
           name={name}
-          items={quality === "low" ? items.filter((_, i) => i % 2 === 0) : items}
+          items={sparse ? items.filter((_, i) => i % 2 === 0) : items}
           castShadow={false}
           receiveShadow={false}
         />

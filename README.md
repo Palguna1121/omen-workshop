@@ -1,6 +1,6 @@
-# Omen Workshop
+# Workshop Omen
 
-Portfolio 3D berbasis web: villa dua lantai dan garage-lab di atas bukit tepi laut saat matahari terbenam, karakter chibi hooded Omen dari GLB lokal pengguna, cinematic exterior → approach → entrance → halaman, lalu eksplorasi third-person di halaman, teras, dan interior garasi. Fondasi kontrol/UI diadaptasi dari prototipe lokal `pf-workshop`; proyek itu tidak diubah.
+Dunia 3D eksplorasi berbasis web: villa dua lantai dan garasi milik Omen di atas bukit tepi laut saat matahari terbenam. Karakter chibi hooded Omen berasal dari GLB lokal pengguna. Alurnya: cinematic exterior → approach → entrance → halaman, lalu jelajah bebas third-person di halaman, teras, interior garasi, dan teras atap. Tidak ada konten portfolio: yang ada benda yang bisa dipakai, kristal tersembunyi, dan makhluk kecil. Fondasi kontrol diadaptasi dari prototipe lokal `pf-workshop`; proyek itu tidak diubah.
 
 ## Menjalankan
 
@@ -12,7 +12,7 @@ npm ci
 npm run dev
 ```
 
-Buka **http://127.0.0.1:3110**. Tombol **Masuk workshop** memulai intro sekitar 9,2 detik dan berakhir di halaman depan garasi; **Lewati intro** langsung memberikan kontrol. Port 3110 dipilih agar tidak berbenturan dengan prototipe sebelumnya.
+Buka **http://127.0.0.1:3110**. Tombol **Masuk** memulai intro sekitar 9,2 detik (sekaligus menyalakan suara) dan berakhir di halaman depan garasi; **Lewati intro** langsung memberikan kontrol. Port 3110 dipilih agar tidak berbenturan dengan prototipe sebelumnya.
 
 ```sh
 npm run typecheck
@@ -31,26 +31,51 @@ npm run start
 | Bergerak | WASD / tombol panah | Joystick kiri |
 | Berlari | Shift | Kecepatan jalan |
 | Lompat | Space (sekali tekan) | Tombol Lompat |
-| Kamera | Drag mouse; scroll untuk zoom | Drag dunia |
-| Interaksi | E / klik label / tombol bawah | Tap label / Buka |
-| Menu | Esc / tombol menu | Tombol menu |
-| Tutup panel | Esc / tombol tutup / backdrop | Tombol tutup / backdrop |
+| Kamera | Drag mouse; scroll untuk zoom; **M** atau **Alt** mengunci kursor (kamera mengikuti mouse tanpa drag) | Drag dunia |
+| Aksi benda | E / klik label / tombol bawah | Tap label / Aksi |
+| Berdiri dari kursi | Gerak, Space, E, atau Esc | Joystick / Berdiri |
+| Peta | **Tab** / klik minimap / ikon peta | Ikon peta |
+| Pengaturan | Esc / ikon pengaturan | Ikon pengaturan |
+| Suara cepat | Ikon speaker di kanan atas | Ikon speaker |
 
-Kontrol dan physics berhenti saat panel/menu terbuka. Blur/tab tersembunyi membersihkan input. Reduced motion melewati intro dan membekukan animasi dunia (awan, laut, angin, portal, burung). Kamera ditarik maju bila terhalang dinding/plafon (raycast Rapier); layar portrait memakai FOV lebih lebar. Audio ambient sintetis opsional (drone hangat, angin, jangkrik) menyala setelah tombol suara ditekan.
+Kontrol dan physics berhenti saat pengaturan/peta terbuka; kursor yang terkunci otomatis dilepas. Esc yang dipakai browser untuk melepas kursor tidak sekaligus membuka pengaturan. Chrome tidak menghitung Alt tunggal sebagai gestur pengguna, jadi bila Alt gagal mengunci, layar memberi petunjuk memakai M; Alt juga dicegah membuka menu bar Firefox. Blur/tab tersembunyi membersihkan input. Reduced motion melewati intro dan membekukan animasi dunia (awan, laut, angin, portal, burung, kipas, uap). Kamera ditarik maju bila terhalang dinding/plafon (raycast Rapier); layar portrait memakai FOV lebih lebar.
 
-Kualitas di menu **Detail dunia**:
+### Antarmuka
 
-| Pilihan | Isi |
+Tidak ada header: semua kontrol berupa widget mengambang. Kiri atas menampilkan area tempat Omen berada (Halaman, Garasi, Teras rumah, Teras atap, Taman tebing, Kebun palem, Lorong belakang, Pohon lentera) dan, bila diaktifkan, chip FPS. Kanan atas berisi ikon suara, peta, kunci kursor (disembunyikan di layar sentuh), pengaturan, counter kristal, dan minimap (desktop).
+
+Peta digambar dengan canvas 2D dari konstanta layout yang sama dengan dunia (`src/ui/WorldMap.tsx`): denah rumah/garasi, halaman, pohon, ikon benda, kristal yang sudah ditemukan, panah arah Omen, dan kerucut pandang kamera. Peta besar menambah label area dan legenda.
+
+### Pengaturan
+
+Panel pengaturan memakai kontrol kustom (segmen, saklar, slider dengan role ARIA dan navigasi keyboard), tanpa dropdown atau elemen form bawaan browser. Semua nilai tersimpan di `localStorage` (`workshop-omen:pengaturan`) dan divalidasi saat dimuat.
+
+| Tab | Isi |
 | --- | --- |
-| Ringan (otomatis untuk layar sentuh/≤4 core) | DPR 1, tanpa shadow, tanpa post-processing, lampu non-esensial dimatikan, hutan jauh separuh |
-| Standar (default) | Shadow matahari 2048, bloom, vignette, tone mapping ACES, SMAA |
-| Tinggi (AO) | Standar + ambient occlusion N8AO |
+| Grafis | Preset Ringan/Standar/Tinggi, resolusi render 50–100 %, bloom, bayangan matahari, ambient occlusion, partikel & debu, lampu tambahan, tampilkan FPS. Mengubah opsi manual menandai preset "Kustom". |
+| Suara | Saklar suara, volume utama, ambient senja, musik radio, efek, tombol uji suara. |
+| Kontrol | Sensitivitas kamera (drag & kursor terkunci), balik sumbu Y, kurangi gerakan, daftar tombol. |
+| Kristal | Daftar kristal, putar intro lagi, sembunyikan kristal lagi, reset pengaturan. |
+
+Perangkat sentuh atau ≤4 core mulai dari preset Ringan bila belum ada pengaturan tersimpan. Di iGPU Radeon 780M: Standar 60 fps, Tinggi (AO) ~51 fps di interior.
+
+## Deploy
+
+Semua rute statis (`/`, 404, gambar Open Graph/Twitter), tanpa API key atau database.
+
+- **Vercel (disarankan):** impor repo, build default `npm run build`. URL gambar share otomatis memakai domain produksi.
+- **Host lain (Node):** set `SITE_URL` saat build (mis. `SITE_URL=https://workshop-omen.contoh npm run build`), lalu `npm run start`. Tanpa `SITE_URL`, URL gambar share jatuh ke `localhost`.
+- **Ukuran:** `public/` 3,7 MB (karakter 3,4 MB + kit 0,28 MB). Bundle JS game ~1,4 MB gzip (Three.js + Rapier). Model di-*preload* lewat `<link rel="preload">` sehingga diunduh bersamaan dengan JS.
+- **Aset mentah** (master, video, sumber animasi; 135 MB) ada di `assets-src/omen/`, di-gitignore dan tidak ikut deploy. Riwayat git lama masih memuatnya; bersihkan dengan `git filter-repo` sebelum push bila repo akan publik.
+- **Metadata share:** `src/app/opengraph-image.jpg` dan `twitter-image.jpg` (1200 × 630, screenshot hero) beserta teks alt.
+
+Sebelum publik, uji di perangkat nyata: iPhone Safari, Android kelas bawah, Firefox, dan kunci kursor (M/Alt).
 
 ## Model dan animasi
 
 **Entry runtime:** `public/models/omen-character.glb` → `/models/omen-character.glb`.
 
-Seluruh isi `/home/nanaaa/Downloads/omen` disalin ke `public/models/omen/` dengan struktur relatif utuh, termasuk 8 GLB tambahan dan unduhan ulang run/standing-relax. Ada 28 file, total 140.567.107 byte, termasuk master, video, folder `tess`, referensi, serta laporan sumber. Sumber asli tidak diedit. Checksum SHA-256 semua salinan cocok dengan sumber; lihat `docs/model-inventory.json`.
+Seluruh isi `/home/nanaaa/Downloads/omen` disalin ke `assets-src/omen/` (di-gitignore dan tidak ikut deploy; hanya bundle runtime yang ada di `public/`) dengan struktur relatif utuh, termasuk 8 GLB tambahan dan unduhan ulang run/standing-relax. Ada 28 file, total 140.567.107 byte, termasuk master, video, folder `tess`, referensi, serta laporan sumber. Sumber asli tidak diedit. Checksum SHA-256 semua salinan cocok dengan sumber; lihat `docs/model-inventory.json`.
 
 | File | Ukuran | Isi |
 | --- | ---: | --- |
@@ -73,7 +98,7 @@ Model dinormalisasi ke tinggi 1,65 unit, diklon dengan SkeletonUtils, dan mengik
 
 Klip jump sumber berisi beberapa hop. Runtime menggunakan segmen pertama, frame 0 sampai sebelum 11 pada 24 fps (0–0,417 detik), sebagai satu lompatan. Root translation XYZ pada segmen ini dikunci agar tidak menambahkan perpindahan/tinggi di atas Rapier. Pose tulang tetap berasal dari klip asli. Klip dimainkan sekali, waktunya disesuaikan ke lama terbang nominal sekitar 1,08 detik, lalu kembali idle/walk setelah kaki menapak. Input dan state animasi diproses sebelum mixer/physics; posisi runtime diperbarui sesudah step physics. File sumber dan klip sumber dalam GLB tetap utuh.
 
-Pemetaan klip dan jeda standing-relax dapat diganti di `src/game/config.ts`. Run hanya memakai walk 1,7× sebagai cadangan jika model pengganti tidak mempunyai klip run. `sit` (7,17 detik), `defeat_03` (5,54 detik), dan `defeat_02` (5,54 detik) sudah tersimpan; belum ditautkan ke aksi portfolio. Idle/jump prosedural hanya menjadi cadangan bila model pengganti tidak memiliki klip tersebut.
+Pemetaan klip dan jeda standing-relax dapat diganti di `src/game/config.ts`. Run hanya memakai walk 1,7× sebagai cadangan jika model pengganti tidak mempunyai klip run. `sit` (7,17 detik), `defeat_03` (5,54 detik), dan `defeat_02` (5,54 detik) sudah tersimpan; `sit` dipakai untuk duduk di sofa dan kursi gaming; `defeat` belum dipakai. Idle/jump prosedural hanya menjadi cadangan bila model pengganti tidak memiliki klip tersebut.
 
 Space dan tombol mobile meminta satu lompatan. Ray di bawah capsule mengecualikan karakter sendiri dan memeriksa arah normal permukaan; permintaan di udara dibuang. Menahan Space tidak menyebabkan lompatan berulang. Ada tabrakan plafon dan furniture. Physics, kontrol, dan mixer animasi ikut berhenti saat panel/menu terbuka.
 
@@ -89,49 +114,40 @@ npm run prepare:character
 ## Dunia
 
 - **Langit & laut**: shader kubah sunset (gradasi ungu–magenta–jingga, matahari, awan fbm, bintang) dan laut dengan kilau matahari; tebing laut, pagoda, hutan tropis dari pohon kit, lampu desa di lembah, dan burung terbang.
-- **Plot**: halaman ubin basah (memantulkan langit lewat environment map), tembok batu dengan pilar lentera dan pagar kayu, pohon peneduh besar berlampion rotan, palem, pisang, bougainvillea, pot besar.
-- **Rumah**: plinth batu, tangga dengan strip LED (bisa dinaiki), teras dan balkon kayu, pintu berukir, jendela hangat, spanduk ungu, lampu dinding, lampu kabel, atap genteng.
-- **Garasi**: bukaan lebar dengan neon oranye, awning genteng, rooftop terrace berpergola dan lampu kabel. Interiornya dinding panel merah, lampion rotan, lampu tabung oranye, meja PC tiga monitor, papan blueprint, workbench + pegboard, lemari perkakas merah, portal batu dengan pusaran shader dan kristal, rak trofi, sudut santai, motor dengan rim neon cyan.
-- **Hotspot**: ikon gelembung neon melayang di atas tiap stasiun dan memudar saat kamera terlalu dekat; stasiun terdekat diganti tombol HTML yang bisa diklik.
-- **Performa**: arsitektur statis digabung per material (`StaticBatch`), props kit di-instance, material/geometri dipakai bersama, lampu bertingkat prioritas. Di iGPU Radeon 780M (Chrome, 1440×900, DPR 1): 60 fps di welcome, intro, halaman, dan interior pada kualitas Standar.
+- **Halaman**: ubin basah (memantulkan langit lewat environment map), tembok batu dengan pilar lentera dan pagar kayu, pohon peneduh besar berlampion rotan, palem, pisang, bougainvillea, pot besar.
+- **Rumah**: plinth batu, tangga ber-LED (bisa dinaiki), teras dan balkon, pintu berukir, jendela hangat, spanduk ungu, lampu dinding, lampu kabel.
+- **Garasi**: neon oranye di atas pintu, awning genteng, teras atap berpergola. Di dalam: dinding panel merah, neon sign "WORKSHOP OMEN", lampion rotan, kipas plafon, lampu kabel, tanaman gantung, meja PC tiga monitor, papan blueprint, workbench + pegboard, portal batu, rak trofi, sofa, motor neon.
+- **Performa**: arsitektur statis digabung per material (`StaticBatch`), props kit di-instance, material/geometri dipakai bersama, lampu bertingkat prioritas. Di iGPU Radeon 780M (Chrome, 1440×900, DPR 1): 60 fps di hero, intro, halaman, dan interior pada kualitas Standar.
 
-Sumber aset, lisensi, dan pipeline Blender → glTF ada di `docs/ASSETS.md`.
+### Benda yang bisa dipakai
 
-## Concept art dan storyboard
-
-Lima referensi visual dunia dari pemilik (16 Oktober 2026) tersimpan terkompresi di `docs/references/` dan tidak ikut deploy. Folder `public/assets/concepts/` dan `public/assets/storyboards/` tetap disiapkan untuk delapan gambar asli dari chat “Ide Game Web 3D”, yang belum tersedia sebagai file.
-
-Nama tujuan ketika gambar asli tersedia:
-
-```text
-public/assets/concepts/
-  interior-isometric.png
-  interior-cozy.png
-  exterior-establishing.png
-  exterior-approach.png
-  entrance.png
-  interior-3d-preview.png
-public/assets/storyboards/
-  storyboard-01-04.png
-  storyboard-05-08.png
-```
-
-Lihat `docs/ASSETS.md`.
-
-## Interaksi dan halaman biasa
-
-| Objek | Konten |
+| Benda | Aksi |
 | --- | --- |
-| Workbench + pegboard | Proyek |
-| Meja PC tiga monitor | Keahlian / tech stack |
-| Sudut santai (sofa) | Tentang saya |
-| Rak trofi | Pengalaman |
-| Papan blueprint | Perjalanan |
-| Portal batu | Proyek pilihan |
+| Sofa | Omen duduk (klip `sit`), kamera mengikuti |
+| Meja komputer | Duduk di kursi gaming; tiga monitor menyala dengan kode bergulir |
+| Workbench | Printer 3D bergerak dan mencetak, hologram berganti bentuk, percikan api |
+| Radio tua | Musik lo-fi generatif; volume mengikuti jarak, not musik melayang |
+| Motor neon | Mesin dipanaskan: getar, lampu depan, cahaya bawah, asap knalpot |
+| Portal batu | Teleport ke teras atap; portal atap membawa kembali |
+| Pintu rumah | Ketuk; ketukan kedua membuat sosok mengintip dari jendela atas |
 
-Konten portfolio dirender sebagai HTML dengan modal native dan pengembalian fokus. Menu memberi akses langsung ke semua sudut. `/portfolio`, `/projects`, `/projects/[slug]`, `/about`, dan `/experience` menyediakan portfolio biasa. Halaman HTML dapat dibaca tanpa WebGL dan tanpa JavaScript. Homepage memiliki ringkasan HTML dan tautan noscript. WebGL tidak tersedia atau context hilang menampilkan fallback.
+Ikon gelembung neon melayang di atas tiap benda dan memudar saat kamera terlalu dekat. Benda terdekat menampilkan tombol HTML yang bisa diklik.
 
-Data awal di `src/data/` masih draft dari konteks sebelumnya. Tidak ada perusahaan, tanggal kerja, metrik hasil, kontak, CV, atau URL eksternal yang dikarang. Tinjau nama/deskripsi proyek dan tambahkan link nyata sebelum publikasi.
+### Kristal tersembunyi
+
+Delapan kristal ungu tersebar di halaman, teras, atap, lorong belakang, kebun, dan interior. Progres tersimpan di `localStorage` (`workshop-omen:kristal`); menu menunjukkan lokasi yang sudah ditemukan dan bisa menyembunyikan semuanya lagi. Setelah kedelapannya ditemukan, kembang api menyala di atas laut dan kedua portal berubah keemasan.
+
+### Makhluk kecil
+
+Kucing hitam tidur di bean bag (bangun, menoleh, dan mengeong saat didekati), kunang-kunang di pohon besar (berkerumun mengitari Omen), burung di pagar depan (terbang saat didekati, kembali setelah 25 detik), figur Omen mini di rak yang menoleh ke arah Omen, dan robot penyedot debu yang berkeliling garasi.
+
+### Suara
+
+Semua suara disintesis WebAudio, tanpa file audio: ambient senja (drone, angin, ombak, jangkrik), langkah kaki (kayu di dalam/teras, batu di halaman), dengung portal sesuai jarak, radio lo-fi, serta efek duduk, PC, workbench, mesin motor, teleport, ketukan, kristal, kucing, dan burung. Suara menyala saat menekan **Masuk** (kecuali sebelumnya dimatikan lewat tombol), dan berhenti saat tab disembunyikan.
+
+Sumber aset, lisensi, dan pipeline Blender → glTF ada di `docs/ASSETS.md`. Referensi visual dari pemilik tersimpan terkompresi di `docs/references/` (tidak ikut deploy).
+
+Tidak ada halaman HTML lain selain `/` dan 404. Perangkat tanpa WebGL atau JavaScript melihat kartu sederhana yang menjelaskan kebutuhan itu.
 
 ## Struktur
 
@@ -140,16 +156,19 @@ src/
   app/                    Rute Next.js, metadata, CSS Tailwind
   game/
     Game.tsx              Canvas, physics, kualitas, fallback
-    config.ts             Entry model, spawn, stasiun interaksi
+    Effects.tsx           Bloom, vignette, ACES, SMAA, AO opsional
+    config.ts             Entry model, spawn, spot aksi, kristal
     runtime.ts            Input/posisi per-frame
     player/               Controller, capsule, model, animasi
     camera/               Intro GSAP dan kamera third-person
-    world/                Rumah, garage, equipment, portal
-    interaction/          Radius terdekat, prompt, sistem interaksi
-    audio/                Ambient WebAudio
-  ui/                     Loading, HUD, joystick, modal, konten HTML
-  data/                   Profil, proyek, skill, pengalaman
-  store/                  State Zustand
+    world/                Langit, laut, lanskap, halaman, rumah, garasi,
+                          interior, dekor, benda interaktif, kristal,
+                          makhluk, vegetasi, lentera, portal, hotspot,
+                          kit props (Kit.tsx), palet & tekstur canvas
+    interaction/          Spot terdekat, aksi (duduk/toggle/teleport)
+    audio/                Sintesis WebAudio + suara berbasis posisi
+  ui/                     Hero, HUD, joystick, menu, ikon
+  store/                  State Zustand (aksi, kristal, suara)
 scripts/inspect-assets.mjs        Pemeriksaan inventaris dan checksum
 scripts/fetch-world-assets.mjs    Unduh kit Kenney CC0 ke .cache/
 scripts/blender/build-world-kit.py Rakit kit props di Blender
@@ -163,9 +182,8 @@ Stack: Next.js 16.4, React 19, TypeScript, Tailwind 4, Three.js, Fiber 9, drei, 
 
 Hasil pemeriksaan sesi ini dicatat di `docs/VALIDATION.md`.
 
-1. Interior rumah belum bisa dimasuki; pintu rumah bisa menjadi stasiun baru (misalnya kontak) bila dibutuhkan.
-2. Arsitektur rumah/garasi masih procedural; bila ingin detail setara referensi, model ulang fasad di Blender dan muat lewat pipeline kit, pertahankan collider sederhana.
-3. Tautkan sit/defeat bila interaksinya dibutuhkan, dan perbaiki skin weights jubah/feet contact.
-4. Tambahkan collision kamera terhadap prop; saat ini kamera dibatasi ke dalam dinding hub.
-5. Lengkapi studi kasus, pengalaman, kontak, dan CV milik pemilik.
-6. Lakukan QA perangkat fisik, Safari/Firefox, koneksi lambat, kemudian hosting.
+1. Interior rumah belum bisa dimasuki; pintu hanya bisa diketuk.
+2. Arsitektur rumah/garasi masih procedural; untuk detail setara referensi, model ulang fasad di Blender dan muat lewat pipeline kit, pertahankan collider sederhana.
+3. Klip `defeat` belum dipakai; skin weights jubah/feet contact masih bisa diperbaiki.
+4. Kamera bertabrakan dengan collider Rapier, belum dengan props tanpa collider (tanaman, lampion).
+5. Lakukan QA perangkat fisik, Safari/Firefox, koneksi lambat, kemudian hosting.

@@ -1,27 +1,30 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { findNearestStation } from "./proximity";
+import { findNearestSpot } from "./proximity";
 
 describe("Interaksi berdasarkan jarak", () => {
-  test("area tengah, halaman spawn, dan titik jauh tidak membuka stasiun", () => {
-    assert.equal(findNearestStation(0, 0), null);
-    assert.equal(findNearestStation(0, 9.5), null);
-    assert.equal(findNearestStation(100, 100), null);
+  test("halaman spawn, tengah garasi, dan titik jauh tidak memicu spot", () => {
+    assert.equal(findNearestSpot(0, 9.5), null);
+    assert.equal(findNearestSpot(0, 0.6), null);
+    assert.equal(findNearestSpot(100, 100), null);
   });
-  test("semua objek hub dapat ditemukan", () => {
-    assert.equal(findNearestStation(-3.3, -3.0), "skills");
-    assert.equal(findNearestStation(3.3, -3.0), "projects");
-    assert.equal(findNearestStation(4.5, 2.6), "experience");
-    assert.equal(findNearestStation(-3.8, 1.3), "about");
-    assert.equal(findNearestStation(0, -3.6), "journey");
-    assert.equal(findNearestStation(4.2, -0.9), "featured");
+  test("setiap spot lantai bawah dapat ditemukan", () => {
+    assert.equal(findNearestSpot(-3.9, 1.2), "sofa");
+    assert.equal(findNearestSpot(-3.3, -2.75), "desk");
+    assert.equal(findNearestSpot(3.3, -2.9), "workbench");
+    assert.equal(findNearestSpot(0, -3.5), "radio");
+    assert.equal(findNearestSpot(2.55, 2.4), "bike");
+    assert.equal(findNearestSpot(4.2, -0.9), "portal");
   });
-  test("batas radius inklusif tanpa membuka objek di luar radius", () => {
-    assert.equal(findNearestStation(-5.5, -3.0), "skills");
-    assert.equal(findNearestStation(-5.51, -3.0), null);
+  test("spot di ketinggian hanya aktif pada lantainya sendiri", () => {
+    // Pintu rumah di teras (lantai 1,2 m), portal atap di atas garasi (4,45 m).
+    assert.equal(findNearestSpot(-11.6, 4.1, 1.2), "door");
+    assert.equal(findNearestSpot(-11.6, 4.1, 0), null);
+    assert.equal(findNearestSpot(-3.3, -2.5, 4.48), "roof");
+    assert.equal(findNearestSpot(-3.3, -2.5, 0), "desk");
   });
-  test("area radius yang tumpang tindih memilih objek paling dekat", () => {
-    assert.equal(findNearestStation(4.4, 0.9), "experience");
-    assert.equal(findNearestStation(4.3, 0.6), "featured");
+  test("batas radius inklusif", () => {
+    assert.equal(findNearestSpot(0, -3.5 + 1.7), "radio");
+    assert.equal(findNearestSpot(0, -3.5 + 1.71), null);
   });
 });

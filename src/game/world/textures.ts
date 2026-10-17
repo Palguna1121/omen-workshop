@@ -558,3 +558,109 @@ export function hotspotTexture(path: string, color: string) {
     false,
   );
 }
+
+/** Papan neon "WORKSHOP / OMEN" dengan latar transparan (ikut bloom). */
+export function neonSignTexture() {
+  return make(
+    "neon-sign",
+    1024,
+    512,
+    (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      const tube = (text: string, y: number, size: number, color: string) => {
+        g.font = `600 ${size}px Fredoka, "Arial Rounded MT Bold", sans-serif`;
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.lineJoin = "round";
+        for (const [blur, width, alpha] of [
+          [40, 18, 0.35],
+          [18, 10, 0.6],
+        ] as const) {
+          g.shadowColor = color;
+          g.shadowBlur = blur;
+          g.globalAlpha = alpha;
+          g.strokeStyle = color;
+          g.lineWidth = width;
+          g.strokeText(text, w / 2, y);
+        }
+        g.globalAlpha = 1;
+        g.shadowBlur = 6;
+        g.lineWidth = 4;
+        g.strokeStyle = "#ffffff";
+        g.strokeText(text, w / 2, y);
+      };
+      tube("WORKSHOP", h * 0.3, 120, "#5fe9ff");
+      tube("OMEN", h * 0.68, 200, "#b06bff");
+      g.shadowColor = "#ffb35c";
+      g.shadowBlur = 20;
+      drawEmblem(g, w * 0.1, h * 0.68, 120, "#ffd29a");
+      drawEmblem(g, w * 0.9, h * 0.68, 120, "#ffd29a");
+    },
+    false,
+  );
+}
+
+/** Gumpalan lembut untuk uap/asap. */
+export function puffTexture() {
+  return make(
+    "puff",
+    64,
+    64,
+    (g, w, h) => {
+      const grad = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+      grad.addColorStop(0, "rgba(255,255,255,0.9)");
+      grad.addColorStop(0.5, "rgba(255,255,255,0.35)");
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = grad;
+      g.fillRect(0, 0, w, h);
+    },
+    false,
+  );
+}
+
+/** Not musik ♪ untuk radio. */
+export function noteTexture() {
+  return make(
+    "note",
+    64,
+    64,
+    (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      g.fillStyle = "#ffffff";
+      g.shadowColor = "#8fb7ff";
+      g.shadowBlur = 8;
+      g.beginPath();
+      g.ellipse(22, 46, 11, 8, -0.4, 0, Math.PI * 2);
+      g.fill();
+      g.fillRect(30, 12, 5, 34);
+      g.beginPath();
+      g.moveTo(35, 12);
+      g.quadraticCurveTo(52, 18, 48, 32);
+      g.quadraticCurveTo(46, 22, 35, 22);
+      g.fill();
+    },
+    false,
+  );
+}
+
+/** Layar kode bergulir untuk monitor yang menyala. */
+export function codeTexture() {
+  const texture = make("code", 256, 512, (g, w, h) => {
+    const rand = seeded(77);
+    g.fillStyle = "#0b0f2a";
+    g.fillRect(0, 0, w, h);
+    for (let y = 8; y < h; y += 14) {
+      let x = 10 + Math.floor(rand() * 4) * 14;
+      const count = 1 + Math.floor(rand() * 4);
+      for (let i = 0; i < count && x < w - 20; i++) {
+        const len = 16 + rand() * 60;
+        g.fillStyle = ["#5fe9ff", "#b88bff", "#ffb35c", "#9ff3c7", "#e6e1ff"][Math.floor(rand() * 5)];
+        g.globalAlpha = 0.55 + rand() * 0.45;
+        g.fillRect(x, y, len, 5);
+        x += len + 8;
+      }
+    }
+    g.globalAlpha = 1;
+  });
+  return texture;
+}

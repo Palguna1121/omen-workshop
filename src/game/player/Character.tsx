@@ -129,14 +129,17 @@ function Model({ url }: { url: string }) {
   // Perbarui state sebelum mixer/physics agar jump dimulai pada frame input.
   useFrame((_, delta) => {
     const state = useGameStore.getState();
-    const paused = state.phase === "playing" && (!!state.section || state.menuOpen);
+    const paused = state.phase === "playing" && (state.menuOpen || state.mapOpen);
     pauseCharacterAnimation(mixer, paused);
     if (paused) return;
     stationaryTime.current = state.phase === "playing" && runtime.grounded && runtime.speed <= 0.15
       ? stationaryTime.current + delta
       : 0;
+    const sit = characterAsset.animations.sit;
     const configured =
-      !runtime.grounded
+      runtime.pose && actions[sit]
+        ? sit
+        : !runtime.grounded
         ? characterAsset.animations.jump
         : runtime.speed > 4
         ? characterAsset.animations.run

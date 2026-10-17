@@ -1,10 +1,10 @@
 # Status aset
 
-- Model: seluruh 28 file dari `/home/nanaaa/Downloads/omen` disalin utuh, total 140.567.107 byte. Run/standing-relax diperbarui dari unduhan ulang. SHA-256 seluruh salinan cocok. Laporan: `model-inventory.json`, termasuk nama/durasi/channel setiap klip.
+- Model: seluruh 28 file dari `/home/nanaaa/Downloads/omen` disalin utuh ke `assets-src/omen/` (gitignored, tidak di-deploy; sebelum 17 Oktober 2026 berada di `public/models/omen/` dan masih ada di riwayat git lama), total 140.567.107 byte. Run/standing-relax diperbarui dari unduhan ulang. SHA-256 seluruh salinan cocok. Laporan: `model-inventory.json`, termasuk nama/durasi/channel setiap klip.
 - Runtime: `/models/omen-character.glb`, 3.530.500 byte, satu mesh/skin/tekstur embedded dan tujuh klip: `sit`, `defeat_03`, `jump`, `idle`, `walk`, `run`, `standing_relax`. Dibuat dengan `npm run prepare:character`; sumber dan checksum dicatat di `character-runtime.json`. Hanya data animasi tambahan yang digabungkan, tanpa menduplikasi mesh/tekstur atau mengubah GLB sumber.
 - Aktif di web: idle asli 15,33 detik, walk 2,33 detik, run 1,25 detik, standing-relax 17,58 detik, dan hop pertama jump asli (0–0,417 dari sumber 2,21 detik). Jump hanya sekali, root translation dikunci, dan durasi playback diselaraskan ke physics. Root XZ walk/run/relax diselaraskan ke bind pose agar pergantian klip tidak menggeser model dari collider.
 - Shift + gerak memakai run asli 1×. Setelah diam 5 detik, idle berganti standing-relax; gerak atau jump membatalkannya. Panel/menu menghentikan animasi dan timer. Run dipercepat dari walk hanya sebagai cadangan bila model pengganti tidak menyediakan run.
-- Sit/defeat tersedia sebagai aset, tetapi belum memiliki aksi gameplay/portfolio. `chibi-defeat-2.glb` menyediakan `defeat_02`; bundle runtime menyediakan `defeat_03`.
+- `sit` dipakai saat Omen duduk di sofa dan kursi gaming; `defeat` tersedia sebagai aset tetapi belum dipakai. `chibi-defeat-2.glb` menyediakan `defeat_02`; bundle runtime menyediakan `defeat_03`.
 - Referensi visual dunia (16 Oktober 2026): lima gambar dari pemilik disimpan terkompresi di `docs/references/` (tidak ikut deploy): eksterior sunset, pendekatan garasi, interior portal, garasi dengan hotspot, ruang isometrik. Arah yang dipakai: gabungan eksterior ref 1–2, interior ref 3–4, ikon hotspot ref 4–5.
 - Environment: lihat bagian "Dunia" di bawah.
 - Model/video/master asli tetap disimpan tanpa optimasi atau modifikasi baru. Ukuran penyimpanan semua aset berbeda dari download awal, karena runtime hanya menggunakan bundle animasi.

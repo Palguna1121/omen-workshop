@@ -1,22 +1,23 @@
-import { useMemo } from "react";
-import { Float, RoundedBox } from "@react-three/drei";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { RoundedBox } from "@react-three/drei";
 import { CuboidCollider, RigidBody } from "@react-three/rapier";
-import { Color, MeshBasicMaterial, type Material, type Texture } from "three";
+import { Color, Group, MeshBasicMaterial, type Material, type Texture } from "three";
+import { runtime } from "../runtime";
 import { useGameStore } from "@/store/gameStore";
 import type { Vec3 } from "../config";
 import { Banner } from "./House";
 import { GARAGE } from "./layout";
-import { Lamp, RattanLantern } from "./Lanterns";
+import { Lamp, RattanLantern, StringLights } from "./Lanterns";
+import { CeilingFan, NeonSign, Steam } from "./Decor";
 import { Block } from "./Primitives";
 import { glow, palette, surface } from "./palette";
 import { KitInstances, type KitItem } from "./Kit";
 import { StaticBatch } from "./StaticBatch";
 import {
   blueprintTexture,
-  carvedTexture,
   posterTexture,
   rugTexture,
-  screenTexture,
 } from "./textures";
 
 const screens = new Map<string, MeshBasicMaterial>();
@@ -54,9 +55,31 @@ function Plane({
 }
 
 /** Figur Omen mini untuk rak: hood ungu, wajah gelap, tiga mata cyan. */
-export function Figurine({ position, scale = 1, rotationY = 0 }: { position: Vec3; scale?: number; rotationY?: number }) {
+export function Figurine({
+  position,
+  scale = 1,
+  rotationY = 0,
+  watch = false,
+}: {
+  position: Vec3;
+  scale?: number;
+  rotationY?: number;
+  /** Menoleh ke arah Omen bila berada dalam jangkauan. */
+  watch?: boolean;
+}) {
+  const group = useRef<Group>(null);
+  useFrame((_, delta) => {
+    const g = group.current;
+    if (!watch || !g || useGameStore.getState().reducedMotion) return;
+    const dx = runtime.player.x - position[0];
+    const dz = runtime.player.z - position[2];
+    const near = Math.hypot(dx, dz) < 6;
+    const target = near ? Math.atan2(dx, dz) : rotationY;
+    const diff = Math.atan2(Math.sin(target - g.rotation.y), Math.cos(target - g.rotation.y));
+    g.rotation.y += diff * (1 - Math.exp(-4 * Math.min(delta, 0.1)));
+  });
   return (
-    <group position={position} scale={scale} rotation={[0, rotationY, 0]}>
+    <group ref={group} position={position} scale={scale} rotation={[0, rotationY, 0]}>
       <mesh position={[0, 0.09, 0]} material={surface({ color: "#2a2433", roughness: 0.7 })} castShadow>
         <cylinderGeometry args={[0.07, 0.09, 0.18, 8]} />
       </mesh>
@@ -157,8 +180,8 @@ function GamingChair({ position, rotationY = 0 }: { position: Vec3; rotationY?: 
       </mesh>
       <RoundedBox args={[0.58, 0.12, 0.56]} radius={0.05} position={[0, 0.56, 0]} material={shell} castShadow />
       <RoundedBox args={[0.56, 0.95, 0.12]} radius={0.06} position={[0, 1.08, 0.27]} rotation={[-0.12, 0, 0]} material={shell} castShadow />
-      <RoundedBox args={[0.2, 0.8, 0.13]} radius={0.04} position={[0, 1.06, 0.26]} rotation={[-0.12, 0, 0]} material={accent} />
-      <mesh position={[0, 1.32, 0.19]} rotation={[-0.12, Math.PI, 0]} material={glow(palette.cyan, 3)}>
+      <RoundedBox args={[0.2, 0.8, 0.06]} radius={0.025} position={[0, 1.07, 0.345]} rotation={[-0.12, 0, 0]} material={accent} />
+      <mesh position={[0, 1.36, 0.385]} rotation={[-0.12, 0, 0]} material={glow(palette.cyan, 3)}>
         <planeGeometry args={[0.14, 0.1]} />
       </mesh>
       {[-1, 1].map((s) => (
@@ -168,7 +191,7 @@ function GamingChair({ position, rotationY = 0 }: { position: Vec3; rotationY?: 
   );
 }
 
-function Motorcycle({ position, rotationY = 0 }: { position: Vec3; rotationY?: number }) {
+export function Motorcycle({ position, rotationY = 0 }: { position: Vec3; rotationY?: number }) {
   const body = surface({ color: "#221c2c", metalness: 0.55, roughness: 0.35 });
   const purple = surface({ color: "#4b2a7a", metalness: 0.5, roughness: 0.35 });
   const chrome = surface({ color: "#a8a6b5", metalness: 0.9, roughness: 0.25 });
@@ -224,9 +247,22 @@ const shelfPlantsB: KitItem[] = [
   { position: [0.55, 0.82, -4.5], scale: 1.1 },
 ];
 
-/** Interior garasi: setiap sudut adalah stasiun portfolio. */
+// Tanaman gantung dari balok plafon (origin model di ujung bawah).
+const ceilingMoss: KitItem[] = [
+  [-5.3, -3.4], [-1.6, -3.4], [1.2, -3.4], [5.2, -3.4],
+  [-5.4, 3.4], [-2.2, 3.4], [4.9, 3.4],
+].map(([x, z], i) => ({ position: [x, GARAGE.ceiling - 1.25 - (i % 3) * 0.12, z + 0.12] as Vec3, rotation: i * 1.3, scale: 0.95 + (i % 2) * 0.2 }));
+
+/** Layout monitor meja PC (lokal grup meja): x, y, z, rotY, lebar, tinggi. */
+export const monitors = [
+  [0, 1.47, -0.18, 0, 1.05, 0.62],
+  [-1.12, 1.42, -0.08, 0.38, 0.78, 0.48],
+  [1.12, 1.42, -0.08, -0.38, 0.78, 0.48],
+] as const;
+export const DESK_ORIGIN: Vec3 = [-3.3, 0, -4.3];
+
+/** Interior garasi: setiap sudut punya benda yang bisa dipakai. */
 export function Interior() {
-  const reduced = useGameStore((s) => s.reducedMotion);
   const wood = palette.woodWarm;
   const shelf = palette.wood;
   const drawerRed = surface({ color: "#a3343a", roughness: 0.55, metalness: 0.15 });
@@ -250,14 +286,9 @@ export function Interior() {
             </group>
           ))}
           {/* Tiga monitor: tengah besar, sisi menyudut ke dalam. */}
-          {[
-            [0, 1.47, -0.18, 0, 1.05, 0.62, 0],
-            [-1.12, 1.42, -0.08, 0.38, 0.78, 0.48, 1],
-            [1.12, 1.42, -0.08, -0.38, 0.78, 0.48, 2],
-          ].map(([x, y, z, rot, w, h, v]) => (
+          {monitors.map(([x, y, z, rot, w, h]) => (
             <group key={x} position={[x, y, z]} rotation={[0, rot, 0]}>
               <Block size={[w + 0.06, h + 0.06, 0.05]} color="#16131d" />
-              <Plane position={[0, 0, 0.027]} size={[w, h]} material={screen(screenTexture(v as 0 | 1 | 2), 1.8)} />
               <Block position={[0, -h / 2 - 0.12, -0.04]} size={[0.06, 0.24, 0.06]} color="#16131d" />
               <Block position={[0, -h / 2 - 0.235, 0]} size={[0.28, 0.02, 0.18]} color="#16131d" />
             </group>
@@ -302,7 +333,6 @@ export function Interior() {
             <Block key={x} position={[x, 0.42, 0.58]} size={[0.7, 0.66, 0.02]} color={palette.woodDeep} />
           ))}
           <Block position={[-0.35, 0.98, 0.3]} size={[0.4, 0.32, 0.36]} color="#c69a62" />
-          <Block position={[0.3, 0.92, 0.32]} size={[0.32, 0.2, 0.3]} color="#7d4e33" />
         </group>
 
         {/* ===== Workbench & pegboard (Proyek), kanan belakang ===== */}
@@ -340,8 +370,6 @@ export function Interior() {
               <Block key={x} position={[x, 0.33, -0.2]} size={[0.04, 0.62, 0.04]} color="#2b2633" />
             ))}
             <Block position={[0, 0.63, -0.2]} size={[0.56, 0.05, 0.06]} color="#2b2633" />
-            <Block position={[0, 0.48, -0.15]} size={[0.1, 0.12, 0.1]} color="#c7c3d0" />
-            <Block position={[0, 0.08, 0.05]} size={[0.4, 0.02, 0.36]} glowColor={palette.cyan} glowIntensity={1.6} />
           </group>
           <group position={[-1.05, 1.0, 0.05]}>
             <Block position={[0, 0.12, 0]} size={[0.62, 0.24, 0.3]} material={drawerRed} />
@@ -427,10 +455,7 @@ export function Interior() {
           ].map(([z, color, rot]) => (
             <RoundedBox key={z as number} args={[0.18, 0.42, 0.42]} radius={0.08} position={[-0.12, 0.85, z as number]} rotation={[0, 0, rot as number]} material={surface({ color: color as string, roughness: 1 })} />
           ))}
-          <mesh position={[-0.68, 2.45, 0]} rotation={[0, Math.PI / 2, 0]} material={surface({ color: "#ffffff", map: carvedTexture() })}>
-            <planeGeometry args={[1.5, 1.5]} />
-          </mesh>
-          <Block position={[-0.7, 2.45, 0]} size={[0.04, 1.62, 1.62]} color={palette.woodDeep} />
+          <Block position={[-0.7, 2.5, 0]} size={[0.04, 1.15, 2.3]} color="#1a1225" />
         </group>
         <mesh position={[-3.7, 0.105, 1.2]} rotation={[-Math.PI / 2, 0, Math.PI / 2]} material={surface({ color: "#ffffff", map: rugTexture("red"), roughness: 1 })} receiveShadow>
           <planeGeometry args={[3.0, 2.3]} />
@@ -463,9 +488,16 @@ export function Interior() {
       </StaticBatch>
 
       {/* Objek kecil, figur, kristal, dan tanaman di luar batch (punya material/tekstur unik). */}
-      <Figurine position={[-4.1, 3.085, -4.6]} scale={1.2} />
-      <Figurine position={[-2.1, 2.335, -4.6]} rotationY={0.3} />
-      <Figurine position={[GARAGE.maxX - 0.6, 1.41, 2.15]} rotationY={-Math.PI / 2} scale={1.3} />
+      <Figurine position={[-4.1, 3.085, -4.6]} scale={1.2} watch />
+      <Figurine position={[-2.1, 2.335, -4.6]} rotationY={0.3} watch />
+      <Figurine position={[GARAGE.maxX - 0.6, 1.41, 2.15]} rotationY={-Math.PI / 2} scale={1.3} watch />
+      <NeonSign position={[GARAGE.minX + 0.21, 2.5, 1.2]} />
+      <CeilingFan position={[0, GARAGE.ceiling - 0.05, 1.7]} />
+      <Steam position={[-3.6, 0.55, 0.85]} />
+      <Steam position={[-4.2, 1.13, -4.05]} />
+      <StringLights from={[GARAGE.minX + 0.3, 3.72, -4.7]} to={[GARAGE.maxX - 0.3, 3.72, -4.7]} sag={0.22} count={20} color="#ffc98a" />
+      <StringLights from={[GARAGE.minX + 0.3, 3.75, 4.6]} to={[GARAGE.maxX - 0.3, 3.75, 4.6]} sag={0.3} count={20} color="#d9a8ff" />
+      <KitInstances name="moss" items={ceilingMoss} castShadow={false} />
       <CrystalCluster position={[-3.6, 2.335, -4.6]} scale={0.35} />
       <CrystalCluster position={[GARAGE.maxX - 0.75, 0.1, 0.75]} scale={1.3} />
       <CrystalCluster position={[GARAGE.maxX - 0.75, 0.1, -2.6]} scale={1.1} color="#7f8cff" />
@@ -477,7 +509,7 @@ export function Interior() {
       <KitInstances name="speaker" items={[{ position: [GARAGE.minX + 0.45, 0.08, -0.55], rotation: Math.PI / 2 }]} />
       <KitInstances name="lamp_floor" items={[{ position: [GARAGE.minX + 0.5, 0.08, 3.05] }]} />
       <KitInstances name="bear" items={[{ position: [GARAGE.maxX - 0.55, 2.51, 2.15], rotation: -Math.PI / 2 }]} />
-      <KitInstances name="radio" items={[{ position: [-2.55, 3.085, -4.62] }]} />
+      <KitInstances name="books" items={[{ position: [-2.55, 3.085, -4.62], rotation: 0.2 }]} />
       <KitInstances name="box_closed" items={[{ position: [5.1, 0.08, -2.75], rotation: 0.3 }, { position: [5.1, 0.53, -2.75], rotation: 0.9, scale: 0.8 }]} />
       <KitInstances name="crate" items={[{ position: [7.2, 0.08, 3.1], rotation: 0.4 }, { position: [7.35, 0.68, 3.0], rotation: 1.1, scale: 0.8 }]} />
       <KitInstances name="barrel" items={[{ position: [7.25, 0.08, 2.0] }]} />
@@ -488,22 +520,11 @@ export function Interior() {
       <Vine position={[4.6, 2.8, -4.45]} length={0.7} seed={4} />
       <Vine position={[-5.7, 3.8, 3.4]} length={1.5} seed={5} />
       <Vine position={[5.7, 3.8, -3.6]} length={1.3} seed={6} />
-      <GamingChair position={[-3.3, 0.08, -3.35]} rotationY={Math.PI} />
-      <Motorcycle position={[2.75, 0.08, 3.3]} rotationY={-0.55} />
+      <GamingChair position={[-3.3, 0.08, -3.35]} />
       <Banner position={[GARAGE.maxX - 0.17, 3.0, -0.9]} rotationY={-Math.PI / 2} size={[0.6, 0.9]} />
       <mesh position={[-2.55, 0.42, 3.3]} scale={[1, 0.6, 1]} material={surface({ color: "#b8452f", roughness: 0.95 })} castShadow>
         <sphereGeometry args={[0.55, 16, 12]} />
       </mesh>
-      {/* Hologram mengambang di atas workbench. */}
-      <group position={[3.3, 1.0, -4.15]}>
-        <Block position={[0, 0.04, 0]} size={[0.5, 0.08, 0.5]} color="#2b2633" />
-        <Block position={[0, 0.09, 0]} size={[0.42, 0.01, 0.42]} glowColor={palette.cyan} glowIntensity={2.5} />
-        <Float speed={reduced ? 0 : 1.5} floatIntensity={reduced ? 0 : 0.25} rotationIntensity={reduced ? 0 : 0.6}>
-          <mesh position={[0, 0.5, 0]} material={glow("#9b5cff", 2.4)}>
-            <icosahedronGeometry args={[0.2, 0]} />
-          </mesh>
-        </Float>
-      </group>
       <RattanLantern position={[-2.6, 3.1, 0.6]} size={0.3} rope={0.55} />
       <RattanLantern position={[2.6, 3.1, 0.6]} size={0.3} rope={0.55} />
 
@@ -523,7 +544,8 @@ export function Interior() {
         <CuboidCollider position={[-3.75, 0.24, 1.2]} args={[0.45, 0.24, 0.72]} />
         <CuboidCollider position={[-3.3, 0.5, -3.35]} args={[0.32, 0.5, 0.32]} />
         <CuboidCollider position={[2.75, 0.5, 3.3]} args={[0.3, 0.5, 0.9]} rotation={[0, -0.55, 0]} />
-        <CuboidCollider position={[-2.55, 0.3, 3.3]} args={[0.5, 0.3, 0.5]} />
+        {/* Bean bag + kucing: cukup tinggi agar kamera tidak menembus kucing. */}
+        <CuboidCollider position={[-2.55, 0.55, 3.3]} args={[0.5, 0.55, 0.5]} />
         <CuboidCollider position={[7.25, 0.5, 2.5]} args={[0.45, 0.5, 1.0]} />
       </RigidBody>
     </group>

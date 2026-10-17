@@ -6,11 +6,13 @@ export function Dialog({
   title,
   subtitle,
   onClose,
+  wide = false,
 }: {
   children: ReactNode;
   title: string;
   subtitle?: string;
   onClose: () => void;
+  wide?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const close = useRef(onClose);
@@ -29,7 +31,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className="portfolio-dialog"
+      className={wide ? "world-dialog wide" : "world-dialog"}
       aria-labelledby="panel-title"
       onCancel={(event) => {
         event.preventDefault();

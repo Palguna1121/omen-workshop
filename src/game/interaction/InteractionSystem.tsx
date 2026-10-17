@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGameStore } from "@/store/gameStore";
 import { runtime } from "../runtime";
-import { findNearestStation } from "./proximity";
+import { findNearestSpot } from "./proximity";
 
 export function InteractionSystem() {
   const elapsed = useRef(0);
@@ -13,7 +13,7 @@ export function InteractionSystem() {
     const state = useGameStore.getState();
     state.setNearest(
       state.phase === "playing"
-        ? findNearestStation(runtime.player.x, runtime.player.z)
+        ? findNearestSpot(runtime.player.x, runtime.player.z, runtime.player.y - 0.9)
         : null,
     );
   });

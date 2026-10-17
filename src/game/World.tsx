@@ -1,4 +1,4 @@
-import { stations } from "./config";
+import { spots } from "./config";
 import { Interactable } from "./interaction/Interactable";
 import { Atmosphere } from "./world/Atmosphere";
 import { Garage } from "./world/Garage";
@@ -6,7 +6,10 @@ import { Grounds } from "./world/Grounds";
 import { Hotspots } from "./world/Hotspots";
 import { House } from "./world/House";
 import { Interior } from "./world/Interior";
-import { Portal } from "./world/Portal";
+import { Portal, RoofPortal } from "./world/Portal";
+import { Creatures } from "./world/Creatures";
+import { Crystals } from "./world/Crystals";
+import { Interactive } from "./world/Interactive";
 import { Scenery } from "./world/Scenery";
 import { Vegetation } from "./world/Vegetation";
 
@@ -20,10 +23,14 @@ export function World() {
       <Garage />
       <Interior />
       <Portal />
+      <RoofPortal />
+      <Interactive />
+      <Crystals />
+      <Creatures />
       <Vegetation />
       <Hotspots />
-      {stations.map((station) => (
-        <Interactable key={station.id} station={station} />
+      {spots.map((spot) => (
+        <Interactable key={spot.id} spot={spot} />
       ))}
     </>
   );

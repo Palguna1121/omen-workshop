@@ -1,17 +1,21 @@
 import { beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
+import { crystals } from "@/game/config";
 import { useGameStore } from "./gameStore";
 
-describe("Siklus pengalaman", () => {
+describe("Siklus dunia", () => {
   beforeEach(() => {
     useGameStore.setState({
       phase: "loading",
       reducedMotion: false,
-      section: null,
       nearest: null,
+      seated: null,
       menuOpen: false,
-      visited: [],
       introStep: 0,
+      found: [],
+      knocks: 0,
+      peekAt: 0,
+      toggles: { pc: false, workbench: false, radio: false },
     });
   });
   test("loading → ready → intro → bermain", () => {
@@ -26,26 +30,41 @@ describe("Siklus pengalaman", () => {
     assert.equal(state().phase, "playing");
   });
   test("reduced motion langsung memberikan kontrol karakter", () => {
-    useGameStore.getState().configure("low", true);
+    useGameStore.getState().configure(true);
     useGameStore.getState().start();
     assert.equal(useGameStore.getState().phase, "playing");
   });
-  test("kunjungan unik dan pembukaan panel menutup menu", () => {
+  test("kristal unik, id asing ditolak, reset menyembunyikan lagi", () => {
     const state = useGameStore.getState;
-    state().toggleMenu();
-    state().openSection("projects");
-    state().closeSection();
-    state().openSection("projects");
-    assert.deepEqual(state().visited, ["projects"]);
-    assert.equal(state().section, "projects");
-    assert.equal(state().menuOpen, false);
+    assert.equal(state().collect(crystals[0].id), true);
+    assert.equal(state().collect(crystals[0].id), false);
+    assert.equal(state().collect("bukan-kristal"), false);
+    assert.deepEqual(state().found, [crystals[0].id]);
+    const round = state().crystalRound;
+    state().resetCrystals();
+    assert.deepEqual(state().found, []);
+    assert.equal(state().crystalRound, round + 1);
   });
-  test("ulang intro membersihkan panel tanpa menghapus progres", () => {
+  test("toggle radio/PC dan ketukan kedua memunculkan sosok di jendela", () => {
     const state = useGameStore.getState;
-    state().openSection("skills");
+    state().toggle("radio");
+    assert.equal(state().toggles.radio, true);
+    state().toggle("radio");
+    assert.equal(state().toggles.radio, false);
+    state().toggle("pc", true);
+    assert.equal(state().toggles.pc, true);
+    assert.equal(state().knock(), 1);
+    assert.equal(state().peekAt, 0);
+    assert.equal(state().knock(), 2);
+    assert.ok(state().peekAt > 0);
+  });
+  test("ulang intro membuat Omen berdiri tanpa menghapus kristal", () => {
+    const state = useGameStore.getState;
+    state().collect(crystals[1].id);
+    state().setSeated("sofa");
     state().replayIntro();
     assert.equal(state().phase, "intro");
-    assert.equal(state().section, null);
-    assert.deepEqual(state().visited, ["skills"]);
+    assert.equal(state().seated, null);
+    assert.deepEqual(state().found, [crystals[1].id]);
   });
 });

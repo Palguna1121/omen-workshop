@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { DoubleSide, MeshStandardMaterial, type PointLight } from "three";
 import { useGameStore } from "@/store/gameStore";
+import { useSettings } from "@/store/settingsStore";
 import type { Vec3 } from "../config";
 import { Block } from "./Primitives";
 import { glow, palette, surface } from "./palette";
@@ -27,7 +28,7 @@ export function Lamp({
   flicker?: number;
 }) {
   const light = useRef<PointLight>(null);
-  const quality = useGameStore((s) => s.quality);
+  const extraLights = useSettings((s) => s.graphics.extraLights);
   const seed = useMemo(() => position[0] * 3.1 + position[2] * 1.7, [position]);
   useFrame(({ clock }) => {
     if (!light.current || !flicker || useGameStore.getState().reducedMotion) return;
@@ -35,7 +36,7 @@ export function Lamp({
     light.current.intensity =
       intensity * (1 - flicker + flicker * (Math.sin(t) * 0.5 + Math.sin(t * 2.7) * 0.3 + 0.8) * 0.62);
   });
-  if (quality === "low" && !essential) return null;
+  if (!extraLights && !essential) return null;
   return (
     <pointLight
       ref={light}

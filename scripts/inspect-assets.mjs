@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-const root = path.resolve('public/models/omen');
+const root = path.resolve('assets-src/omen');
 const source = process.argv[2] ? path.resolve(process.argv[2]) : null;
 function files(dir, base = dir) {
   return fs.readdirSync(dir, {withFileTypes:true}).flatMap(entry => entry.isDirectory() ? files(path.join(dir,entry.name),base) : [path.relative(base,path.join(dir,entry.name))]).sort();

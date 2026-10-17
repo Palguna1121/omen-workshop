@@ -1,34 +1,36 @@
 import { Html } from "@react-three/drei";
-import { stations } from "../config";
+import type { Spot } from "../config";
 import { useGameStore } from "@/store/gameStore";
+import { Icon } from "@/ui/Icon";
+import { interact } from "./actions";
 
-export function Interactable({
-  station,
-}: {
-  station: (typeof stations)[number];
-}) {
+/** Tombol HTML di atas spot terdekat: bisa diklik/ditap selain tombol E. */
+export function Interactable({ spot }: { spot: Spot }) {
   const active = useGameStore(
     (s) =>
-      s.nearest === station.id &&
+      s.nearest === spot.id &&
       s.phase === "playing" &&
-      !s.section &&
-      !s.menuOpen,
+      !s.menuOpen &&
+      !s.seated,
   );
   if (!active) return null;
   return (
     <Html
-      position={[station.position[0], 2.7, station.position[2]]}
+      position={[spot.position[0], spot.iconHeight - 0.85, spot.position[2]]}
       center
       zIndexRange={[10, 0]}
     >
       <button
         className="world-marker"
-        onClick={() => useGameStore.getState().openSection(station.id)}
-        aria-label={`Buka ${station.title}`}
+        onClick={() => interact(spot.id)}
+        aria-label={`${spot.verb}: ${spot.object}`}
+        style={{ ["--marker" as string]: spot.color }}
       >
-        <span className="marker-dot" style={{ background: station.color }} />
-        {station.title}
-        <span className="marker-arrow">↗</span>
+        <span className="marker-icon" aria-hidden="true">
+          <Icon name={spot.icon} size={16} />
+        </span>
+        {spot.verb}
+        <kbd>E</kbd>
       </button>
     </Html>
   );

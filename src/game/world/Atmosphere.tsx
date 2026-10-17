@@ -2,12 +2,14 @@ import { useMemo } from "react";
 import { Environment, Lightformer, Sparkles } from "@react-three/drei";
 import { Object3D } from "three";
 import { useGameStore } from "@/store/gameStore";
+import { useSettings } from "@/store/settingsStore";
 import { FOG, PLOT, SUN_LIGHT } from "./environment";
 import { SkyDome } from "./Sky";
 
 /** Cahaya global sunset, fog, environment untuk pantulan, dan partikel debu/kunang. */
 export function Atmosphere() {
-  const quality = useGameStore((s) => s.quality);
+  const shadows = useSettings((s) => s.graphics.shadows);
+  const particles = useSettings((s) => s.graphics.particles);
   const reduced = useGameStore((s) => s.reducedMotion);
   const target = useMemo(() => {
     const o = new Object3D();
@@ -27,8 +29,8 @@ export function Atmosphere() {
         target={target}
         color="#ffa45c"
         intensity={2.4}
-        castShadow={quality !== "low"}
-        shadow-mapSize={quality === "low" ? 512 : 2048}
+        castShadow={shadows}
+        shadow-mapSize={2048}
         shadow-camera-left={-26}
         shadow-camera-right={26}
         shadow-camera-top={22}
@@ -46,7 +48,7 @@ export function Atmosphere() {
         <Lightformer form="rect" intensity={3} color="#ff8a3c" position={[0, 3, 10]} scale={[10, 0.6, 1]} />
         <Lightformer form="rect" intensity={2.5} color="#9b5cff" position={[-8, 2, -4]} rotation={[0, Math.PI / 2, 0]} scale={[8, 0.5, 1]} />
       </Environment>
-      {quality !== "low" && !reduced && (
+      {particles && !reduced && (
         <>
           <Sparkles count={70} scale={[30, 5, 22]} position={[PLOT.x, 2.5, PLOT.z + 3]} size={3.2} speed={0.25} opacity={0.85} color="#ffc27a" noise={1.2} />
           <Sparkles count={40} scale={[11, 3.4, 9]} position={[0, 1.9, 0]} size={1.6} speed={0.12} opacity={0.5} color="#ffe2c2" />

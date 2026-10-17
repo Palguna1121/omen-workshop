@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const sourceDir = path.resolve('public/models/omen');
+const sourceDir = path.resolve('assets-src/omen');
 const output = path.resolve('public/models/omen-character.glb');
 const sources = [];
 const hash = data => crypto.createHash('sha256').update(data).digest('hex');

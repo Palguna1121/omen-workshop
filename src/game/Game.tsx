@@ -7,11 +7,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import Link from "next/link";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
+import { Preload } from "@react-three/drei";
 import { ACESFilmicToneMapping, PCFShadowMap } from "three";
 import { useGameStore } from "@/store/gameStore";
+import { useSettings } from "@/store/settingsStore";
 import { World } from "./World";
 import { Player } from "./player/Player";
 import { IntroCamera } from "./camera/IntroCamera";
@@ -19,29 +20,29 @@ import { GameCamera } from "./camera/GameCamera";
 import { InteractionSystem } from "./interaction/InteractionSystem";
 import { AudioHelper } from "./audio/AudioHelper";
 import { Effects } from "./Effects";
+import { SoundDriver } from "./audio/SoundDriver";
+import { FpsMeter } from "./fps";
+import { MapOverlay } from "@/ui/WorldMap";
+import { SettingsPanel } from "@/ui/SettingsPanel";
 import { HUD } from "@/ui/HUD";
-import { ProjectPanel } from "@/ui/ProjectPanel";
 import { LoadingScreen } from "@/ui/LoadingScreen";
 import { playerMotion } from "./config";
 
 export function GameFallback() {
   return (
     <div className="game-fallback">
-      <span className="brand-mark">P.</span>
-      <span className="eyebrow">Palguna · Workshop</span>
+      <span className="brand-mark" aria-hidden="true">✦</span>
+      <span className="eyebrow">Workshop Omen</span>
       <h1>
-        Semua ide,
+        Workshopnya butuh
         <br />
-        tetap di sini.
+        WebGL.
       </h1>
       <p>
-        Dunia 3D belum bisa dibuka di perangkat ini.
+        Perangkat atau browser ini belum bisa menampilkan dunia 3D.
         <br />
-        Kamu tetap bisa membaca semua proyek dan cerita saya.
+        Coba buka di Chrome, Edge, Firefox, atau Safari terbaru.
       </p>
-      <Link className="button button-dark" href="/portfolio">
-        Buka portfolio <span>↗</span>
-      </Link>
     </div>
   );
 }
@@ -83,18 +84,24 @@ function detectDevice() {
 function GameCanvas() {
   const [device] = useState(detectDevice);
   const [lost, setLost] = useState(false);
-  const quality = useGameStore((s) => s.quality);
+  const resolution = useSettings((s) => s.graphics.resolution);
+  const [deviceDpr] = useState(() => Math.min(globalThis.devicePixelRatio || 1, 1.5));
   const phase = useGameStore((s) => s.phase);
   const paused = useGameStore(
-    (s) => s.menuOpen || !!s.section || s.phase !== "playing",
+    (s) => s.menuOpen || s.mapOpen || s.phase !== "playing",
   );
   useEffect(() => {
     const reduced = matchMedia("(prefers-reduced-motion: reduce)");
     const configure = () =>
       useGameStore
         .getState()
-        .configure(device.low ? "low" : "medium", reduced.matches);
+        .configure(reduced.matches);
     configure();
+    useGameStore.getState().hydrateFound();
+    // Pengaturan tersimpan menang; tanpa itu, perangkat lemah mulai dari preset Ringan.
+    const settings = useSettings.getState();
+    settings.hydrate();
+    if (!useSettings.getState().stored && device.low) settings.applyPreset("low", false);
     reduced.addEventListener("change", configure);
     const unsubscribe = useGameStore.subscribe((state) => {
       if (state.reducedMotion && state.phase === "intro") state.finishIntro();
@@ -108,12 +115,12 @@ function GameCanvas() {
   return (
     <main
       className={`game-shell phase-${phase}`}
-      aria-label="Portfolio 3D Palguna"
+      aria-label="Workshop Omen, dunia 3D"
     >
       <div className="game-canvas">
         <Canvas
-          shadows={quality !== "low" ? { type: PCFShadowMap } : false}
-          dpr={quality === "low" ? 1 : [1, 1.5]}
+          shadows={{ type: PCFShadowMap }}
+          dpr={Math.max(0.5, deviceDpr * resolution)}
           camera={{ position: [19, 8.6, 31], fov: 45, near: 0.1, far: 1200 }}
           gl={{
             antialias: !device.low,
@@ -142,8 +149,11 @@ function GameCanvas() {
               <World />
               <Player />
               <InteractionSystem />
+              <Preload all />
               <SceneReady />
               <GameCamera />
+              <SoundDriver />
+              <FpsMeter />
             </Physics>
           </Suspense>
           <IntroCamera />
@@ -151,7 +161,8 @@ function GameCanvas() {
         </Canvas>
       </div>
       <HUD />
-      <ProjectPanel />
+      <SettingsPanel />
+      <MapOverlay />
       <LoadingScreen />
       <AudioHelper />
     </main>

@@ -7,7 +7,7 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
-import { useGameStore } from "@/store/gameStore";
+import { useSettings } from "@/store/settingsStore";
 
 /**
  * Bloom hanya menangkap material glow (nilai HDR > 1), lalu tone mapping ACES.
@@ -16,22 +16,28 @@ import { useGameStore } from "@/store/gameStore";
  * "high": di iGPU Radeon 780M interior turun dari 60 ke ~51 fps.
  */
 export function Effects() {
-  const quality = useGameStore((s) => s.quality);
-  if (quality === "low") return null;
+  const bloom = useSettings((s) => s.graphics.bloom);
+  const ao = useSettings((s) => s.graphics.ao);
+  // Tanpa bloom & AO: composer dilewati, renderer tetap memakai ACES bawaan.
+  if (!bloom && !ao) return null;
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>
-      {quality === "high" ? (
+      {ao ? (
         <N8AO halfRes aoRadius={1.1} intensity={2.4} distanceFalloff={0.8} color="#1e0f2a" />
       ) : (
         <></>
       )}
-      <Bloom
-        mipmapBlur
-        intensity={0.85}
-        luminanceThreshold={1}
-        luminanceSmoothing={0.3}
-        radius={0.7}
-      />
+      {bloom ? (
+        <Bloom
+          mipmapBlur
+          intensity={0.85}
+          luminanceThreshold={1}
+          luminanceSmoothing={0.3}
+          radius={0.7}
+        />
+      ) : (
+        <></>
+      )}
       <Vignette offset={0.32} darkness={0.55} />
       <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       <SMAA />

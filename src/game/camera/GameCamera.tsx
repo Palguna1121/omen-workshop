@@ -5,6 +5,8 @@ import { MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { useGameStore } from "@/store/gameStore";
 import { GROUND_TOP } from "../world/layout";
 import { runtime } from "../runtime";
+import { useSettings } from "@/store/settingsStore";
+import { markReleased } from "./pointerLock";
 
 export function GameCamera() {
   const { gl, camera } = useThree();
@@ -18,9 +20,19 @@ export function GameCamera() {
     let dragging = false;
     let lastX = 0,
       lastY = 0;
+    const look = (dx: number, dy: number, scale: number) => {
+      const { sensitivity, invertY } = useSettings.getState().controls;
+      runtime.yaw -= dx * scale * sensitivity;
+      runtime.pitch = MathUtils.clamp(
+        runtime.pitch + dy * scale * 0.8 * sensitivity * (invertY ? -1 : 1),
+        -0.08,
+        0.75,
+      );
+    };
     const down = (event: PointerEvent) => {
       const state = useGameStore.getState();
-      if (state.phase !== "playing" || state.section || state.menuOpen) return;
+      if (document.pointerLockElement) return;
+      if (state.phase !== "playing" || state.menuOpen || state.mapOpen) return;
       dragging = true;
       lastX = event.clientX;
       lastY = event.clientY;
@@ -28,14 +40,22 @@ export function GameCamera() {
     };
     const move = (event: PointerEvent) => {
       if (!dragging) return;
-      runtime.yaw -= (event.clientX - lastX) * 0.005;
-      runtime.pitch = MathUtils.clamp(
-        runtime.pitch + (event.clientY - lastY) * 0.004,
-        -0.08,
-        0.75,
-      );
+      look(event.clientX - lastX, event.clientY - lastY, 0.005);
       lastX = event.clientX;
       lastY = event.clientY;
+    };
+    // Pointer lock (M/Alt): kamera mengikuti gerak mouse tanpa drag.
+    const lockedMove = (event: MouseEvent) => {
+      if (document.pointerLockElement !== canvas) return;
+      const state = useGameStore.getState();
+      if (state.phase !== "playing" || state.menuOpen || state.mapOpen) return;
+      look(event.movementX, event.movementY, 0.0028);
+    };
+    const lockChange = () => {
+      const locked = document.pointerLockElement === canvas;
+      if (!locked) markReleased();
+      dragging = false;
+      useGameStore.getState().setPointerLocked(locked);
     };
     const up = () => {
       dragging = false;
@@ -57,7 +77,17 @@ export function GameCamera() {
     canvas.addEventListener("lostpointercapture", up);
     canvas.addEventListener("wheel", wheel, { passive: false });
     canvas.addEventListener("contextmenu", context);
+    document.addEventListener("mousemove", lockedMove);
+    document.addEventListener("pointerlockchange", lockChange);
+    // Buka menu/peta atau keluar dari fase bermain: kursor dilepas.
+    const unsubscribe = useGameStore.subscribe((state) => {
+      if ((state.menuOpen || state.mapOpen || state.phase !== "playing") && document.pointerLockElement)
+        document.exitPointerLock();
+    });
     return () => {
+      document.removeEventListener("mousemove", lockedMove);
+      document.removeEventListener("pointerlockchange", lockChange);
+      unsubscribe();
       canvas.removeEventListener("pointerdown", down);
       canvas.removeEventListener("pointermove", move);
       canvas.removeEventListener("pointerup", up);
@@ -75,15 +105,19 @@ export function GameCamera() {
       camera.setFocalLength(camera.getFilmHeight() / (2 * Math.tan(fov * Math.PI / 360)));
     }
     const { target, desired, dir } = vectors;
-    target.set(runtime.player.x, runtime.player.y + 0.55, runtime.player.z);
+    if (runtime.pose) {
+      // Saat duduk, kamera membidik model di kursi, bukan capsule.
+      const [px, py, pz] = runtime.pose.position;
+      target.set(px, py + 1.15, pz);
+    } else target.set(runtime.player.x, runtime.player.y + 0.55, runtime.player.z);
     // Layar portrait (HP) butuh kamera sedikit lebih jauh agar karakter tidak memenuhi layar.
     const aspect = camera instanceof PerspectiveCamera ? camera.aspect : 1.6;
     const distance = runtime.distance * MathUtils.clamp(1.45 - aspect * 0.6, 1, 1.2);
     const horizontal = distance * Math.cos(runtime.pitch);
     desired.set(
-      runtime.player.x + Math.sin(runtime.yaw) * horizontal,
-      Math.max(runtime.player.y + 0.6 + Math.sin(runtime.pitch) * distance, GROUND_TOP + 0.35),
-      runtime.player.z + Math.cos(runtime.yaw) * horizontal,
+      target.x + Math.sin(runtime.yaw) * horizontal,
+      Math.max(target.y + 0.05 + Math.sin(runtime.pitch) * distance, GROUND_TOP + 0.35),
+      target.z + Math.cos(runtime.yaw) * horizontal,
     );
     // Kamera ditarik maju bila ada dinding/plafon antara karakter dan kamera.
     dir.subVectors(desired, target);

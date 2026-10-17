@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Sumber aset CC0 mentah (diunduh ulang lewat scripts/fetch-world-assets.mjs)
 /.cache/
+
+# Aset mentah karakter (master, video, sumber animasi): tidak di-deploy & tidak di-commit.
+/assets-src/

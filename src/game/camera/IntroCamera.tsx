@@ -6,28 +6,28 @@ import { useGameStore } from "@/store/gameStore";
 
 export const introShots = [
   {
-    title: "Rumah untuk segala ide",
+    title: "Senja di bukit Omen",
     label: "Exterior",
     position: [19, 8.6, 31],
     target: [-17, 3.2, -4],
     duration: 0,
   },
   {
-    title: "Ada sesuatu di dalam",
+    title: "Lentera sudah menyala",
     label: "Approach",
     position: [8.5, 3.6, 21],
     target: [-3, 2, 4],
     duration: 3.4,
   },
   {
-    title: "Pintunya selalu terbuka",
+    title: "Garasinya selalu terbuka",
     label: "Entrance",
     position: [1.6, 2.4, 14.5],
     target: [0, 1.7, 3],
     duration: 2.6,
   },
   {
-    title: "Selamat datang di workshop",
+    title: "Selamat menjelajah",
     label: "Halaman",
     position: [0, 2.62, 12.95],
     target: [0, 1.5, 9.5],

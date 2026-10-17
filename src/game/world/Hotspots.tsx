@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Billboard } from "@react-three/drei";
 import { Color, Group, MathUtils, MeshBasicMaterial } from "three";
 import { useGameStore } from "@/store/gameStore";
-import { stations } from "../config";
+import { spots } from "../config";
 import { iconPaths } from "@/ui/Icon";
 import { hotspotTexture } from "./textures";
 
@@ -13,14 +13,13 @@ import { hotspotTexture } from "./textures";
  */
 export function Hotspots() {
   const phase = useGameStore((s) => s.phase);
-  const visited = useGameStore((s) => s.visited);
   const groups = useRef<(Group | null)[]>([]);
   const materials = useMemo(
     () =>
-      stations.map(
-        (station) =>
+      spots.map(
+        (spot) =>
           new MeshBasicMaterial({
-            map: hotspotTexture(iconPaths[station.icon], station.color),
+            map: hotspotTexture(iconPaths[spot.icon], spot.color),
             transparent: true,
             depthWrite: false,
             toneMapped: false,
@@ -34,27 +33,28 @@ export function Hotspots() {
     const reduced = useGameStore.getState().reducedMotion;
     groups.current.forEach((g, i) => {
       if (!g) return;
-      g.position.y = stations[i].iconHeight + (reduced ? 0 : Math.sin(t * 1.6 + i) * 0.06);
+      g.position.y = spots[i].iconHeight + (reduced ? 0 : Math.sin(t * 1.6 + i) * 0.06);
       // Memudar saat kamera terlalu dekat agar ikon tidak menutupi layar.
       const d = camera.position.distanceTo(g.position);
       const fade = MathUtils.smoothstep(d, 1.6, 3.2);
       materials[i].opacity = fade;
-      g.visible = fade > 0.02 && (useGameStore.getState().phase !== "playing" || useGameStore.getState().nearest !== stations[i].id);
+      const state = useGameStore.getState();
+      g.visible = fade > 0.02 && !state.seated && (state.phase !== "playing" || state.nearest !== spots[i].id);
     });
   });
   if (phase === "loading") return null;
   return (
     <>
-      {stations.map((station, i) => (
+      {spots.map((spot, i) => (
         <group
-          key={station.id}
+          key={spot.id}
           ref={(g) => {
             groups.current[i] = g;
           }}
-          position={[station.position[0], station.iconHeight, station.position[2]]}
+          position={[spot.position[0], spot.iconHeight, spot.position[2]]}
         >
           <Billboard>
-            <mesh material={materials[i]} scale={visited.includes(station.id) ? 0.85 : 1} renderOrder={5}>
+            <mesh material={materials[i]} renderOrder={5}>
               <planeGeometry args={[0.5, 0.586]} />
             </mesh>
           </Billboard>

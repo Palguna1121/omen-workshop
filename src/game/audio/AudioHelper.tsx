@@ -1,112 +1,82 @@
 import { useEffect } from "react";
 import { useGameStore } from "@/store/gameStore";
+import {
+  closeAudio,
+  disableAudio,
+  enableAudio,
+  startAmbient,
+  startPortalHum,
+  startRadio,
+  setVolumes,
+  type Loop,
+} from "./sound";
+import { useSettings } from "@/store/settingsStore";
 
-// Sintesis lokal: tidak ada download musik atau audio berlisensi.
-// Lapisan: drone hangat, angin senja, dan jangkrik.
-let context: AudioContext | null = null;
+// Pilihan bisu eksplisit dari pengguna dihormati saat tombol Masuk ditekan.
+let userMuted = false;
 
-export async function enableAudioFromGesture() {
+/** Loop yang volumenya diatur per frame oleh SoundDriver (jarak ke sumber). */
+export const loops: { portal: Loop | null; radio: Loop | null } = {
+  portal: null,
+  radio: null,
+};
+
+export async function enableAudioFromGesture({ respectMute = false } = {}) {
+  if (respectMute && userMuted) return;
+  userMuted = false;
   try {
-    context ??= new AudioContext();
-    await context.resume();
-    useGameStore.getState().setAudio(context.state === "running");
+    useGameStore.getState().setAudio(await enableAudio());
   } catch {
     useGameStore.getState().setAudio(false);
   }
 }
 
+export async function muteAudio() {
+  userMuted = true;
+  useGameStore.getState().setAudio(false);
+  await disableAudio();
+}
+
+/** Mengelola ambient bed, dengung portal, dan radio sesuai state. */
 export function AudioHelper() {
   const enabled = useGameStore((s) => s.audioEnabled);
-  const phase = useGameStore((s) => s.phase);
+  const live = useGameStore((s) => s.phase !== "loading");
+  const radio = useGameStore((s) => s.toggles.radio);
   useEffect(() => {
-    if (!enabled || phase !== "playing" || !context) return;
-    const audio = context;
-    const master = audio.createGain();
-    master.gain.value = 0.018;
-    master.connect(audio.destination);
-    const oscillators = [130.81, 164.81, 196].map((frequency) => {
-      const oscillator = audio.createOscillator();
-      oscillator.type = "sine";
-      oscillator.frequency.value = frequency;
-      oscillator.connect(master);
-      oscillator.start();
-      return oscillator;
-    });
-    // Angin senja: noise lowpass dengan hembusan pelan dari LFO.
-    const noise = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
-    const data = noise.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    const wind = audio.createBufferSource();
-    wind.buffer = noise;
-    wind.loop = true;
-    const windFilter = audio.createBiquadFilter();
-    windFilter.type = "lowpass";
-    windFilter.frequency.value = 520;
-    const windGain = audio.createGain();
-    windGain.gain.value = 0.55;
-    const gust = audio.createOscillator();
-    gust.frequency.value = 0.08;
-    const gustDepth = audio.createGain();
-    gustDepth.gain.value = 0.35;
-    gust.connect(gustDepth).connect(windGain.gain);
-    wind.connect(windFilter).connect(windGain).connect(master);
-    wind.start();
-    gust.start();
-    // Jangkrik: denyut pendek bernada tinggi pada jeda acak.
-    const crickets = audio.createGain();
-    crickets.gain.value = 0.35;
-    crickets.connect(master);
-    let chirpTimer = 0;
-    const chirp = () => {
-      const start = audio.currentTime + 0.02;
-      const tone = audio.createOscillator();
-      const env = audio.createGain();
-      tone.frequency.value = 4200 + Math.random() * 600;
-      env.gain.value = 0;
-      for (let i = 0; i < 3; i++) {
-        env.gain.setValueAtTime(0, start + i * 0.06);
-        env.gain.linearRampToValueAtTime(1, start + i * 0.06 + 0.01);
-        env.gain.linearRampToValueAtTime(0, start + i * 0.06 + 0.04);
-      }
-      tone.connect(env).connect(crickets);
-      tone.start(start);
-      tone.stop(start + 0.25);
-      tone.onended = () => {
-        tone.disconnect();
-        env.disconnect();
-      };
-      chirpTimer = window.setTimeout(chirp, 600 + Math.random() * 2200);
-    };
-    chirp();
-    const mute = () =>
-      master.gain.setTargetAtTime(
-        document.hidden ? 0 : 0.018,
-        audio.currentTime,
-        0.2,
-      );
-    document.addEventListener("visibilitychange", mute);
-    mute();
+    if (!enabled || !live) return;
+    const stopAmbient = startAmbient();
+    loops.portal = startPortalHum();
     return () => {
-      document.removeEventListener("visibilitychange", mute);
-      oscillators.forEach((osc) => {
-        osc.stop();
-        osc.disconnect();
-      });
-      window.clearTimeout(chirpTimer);
-      wind.stop();
-      gust.stop();
-      wind.disconnect();
-      gust.disconnect();
-      windFilter.disconnect();
-      windGain.disconnect();
-      crickets.disconnect();
-      master.disconnect();
+      stopAmbient();
+      loops.portal?.stop();
+      loops.portal = null;
     };
-  }, [enabled, phase]);
+  }, [enabled, live]);
+  useEffect(() => {
+    if (!enabled || !radio) return;
+    loops.radio = startRadio();
+    return () => {
+      loops.radio?.stop();
+      loops.radio = null;
+    };
+  }, [enabled, radio]);
+  useEffect(() => {
+    // Volume per bus mengikuti pengaturan (juga sebelum audio aktif).
+    setVolumes(useSettings.getState().audio);
+    return useSettings.subscribe((state) => setVolumes(state.audio));
+  }, []);
+  useEffect(() => {
+    // Tab tersembunyi: hentikan semua suara; kembali bila masih diaktifkan.
+    const visibility = () => {
+      if (document.hidden) void disableAudio();
+      else if (useGameStore.getState().audioEnabled) void enableAudio();
+    };
+    document.addEventListener("visibilitychange", visibility);
+    return () => document.removeEventListener("visibilitychange", visibility);
+  }, []);
   useEffect(
     () => () => {
-      void context?.close();
-      context = null;
+      void closeAudio();
       useGameStore.getState().setAudio(false);
     },
     [],

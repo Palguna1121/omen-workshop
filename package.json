@@ -8,7 +8,7 @@
     "start": "next start --hostname 127.0.0.1 --port 3110",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/game/interaction/proximity.test.ts src/game/player/animations.test.ts src/store/gameStore.test.ts",
+    "test": "tsx --test src/game/interaction/proximity.test.ts src/game/player/animations.test.ts src/store/gameStore.test.ts src/store/settingsStore.test.ts",
     "inspect:assets": "node scripts/inspect-assets.mjs",
     "prepare:character": "node scripts/prepare-character.mjs",
     "fetch:world-assets": "node scripts/fetch-world-assets.mjs",
@@ -16,7 +16,7 @@
     "optimize:kit": "node scripts/optimize-world-kit.mjs"
   },
   "dependencies": {
-    "@fontsource/lora": "^5.3.0",
+    "@fontsource/fredoka": "^5.3.0",
     "@fontsource/manrope": "^5.3.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
